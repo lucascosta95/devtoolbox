@@ -26,6 +26,7 @@ import dev.devtoolbox.ds.components.PhosphorIcon
 import dev.devtoolbox.ds.components.Tag
 import dev.devtoolbox.ds.components.Text
 import dev.devtoolbox.ui.layouts.DiffLayout
+import dev.devtoolbox.ui.layouts.ImageLayout
 import dev.devtoolbox.ui.layouts.IoLayout
 import dev.devtoolbox.ui.layouts.JwtLayout
 import dev.devtoolbox.ui.layouts.QrLayout
@@ -56,9 +57,10 @@ fun ToolPane(
             is ToolOutput.Failure -> output.body
         }
 
-        // O arquétipo `io` já traz a entrada no card da esquerda; os outros ganham um editor.
-        val ioLayout = body is ToolBody.Io
-        if (!ioLayout) {
+        // `io` traz a entrada no card da esquerda e `image`, na área de soltar arquivo;
+        // os outros ganham um editor.
+        val ownsItsInput = body is ToolBody.Io || body is ToolBody.Image
+        if (!ownsItsInput) {
             ToolInputEditor(
                 input = currentInput,
                 onChange = onInputChange,
@@ -175,6 +177,11 @@ private fun ToolBodyContent(
                 onTryAnother = { cycleExample(toolId, currentInput, onInputChange) },
             )
         is ToolBody.Qr -> QrLayout(body, toolId)
+        is ToolBody.Image -> ImageLayout(
+            body = body,
+            toolId = toolId,
+            onSelectionChange = { onInputChange(ToolInput.Image(it)) },
+        )
     }
 }
 

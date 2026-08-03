@@ -3,9 +3,13 @@ package dev.devtoolbox.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -16,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.devtoolbox.core.BuildInfo
 import dev.devtoolbox.core.Tool
 import dev.devtoolbox.ds.Nocturne
+import dev.devtoolbox.ds.components.PhosphorIcon
 import dev.devtoolbox.ds.components.SectionHeader
 import dev.devtoolbox.ds.components.SidebarItem
 import dev.devtoolbox.ds.components.Text
@@ -25,6 +31,9 @@ import dev.devtoolbox.ds.components.TextField
 
 /** Largura fixa da sidebar (280 px no protótipo). */
 private val SIDEBAR_WIDTH = 280.dp
+
+/** Altura reservada ao rodapé: 11.2 + 16.8 de padding mais uma linha de 11 sp. */
+private val FOOTER_HEIGHT = 44.dp
 
 @Composable
 fun Sidebar(
@@ -49,39 +58,50 @@ fun Sidebar(
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = Nocturne.space.xs, vertical = Nocturne.space.xxs),
-                verticalArrangement = Arrangement.spacedBy(1.dp),
-            ) {
-                if (state.favoriteTools.isNotEmpty()) {
-                    SectionHeader("Favoritos", icon = "star", iconFill = true)
-                    ToolList(state.favoriteTools, state, onSelect, onToggleFavorite)
-                }
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                // O rodapé rola junto com a lista — não é sticky. O mínimo aqui é o que sobra
+                // do viewport: com poucos resultados de busca ele encosta no fim da sidebar,
+                // em vez de ficar solto logo abaixo do último item.
+                val listMinHeight = (maxHeight - FOOTER_HEIGHT).coerceAtLeast(0.dp)
 
-                if (state.recentTools.isNotEmpty()) {
-                    SectionHeader("Recentes", icon = "clock-counter-clockwise")
-                    ToolList(state.recentTools, state, onSelect, onToggleFavorite)
-                }
-
-                for ((category, tools) in state.categories) {
-                    SectionHeader(category.label, icon = category.icon)
-                    ToolList(tools, state, onSelect, onToggleFavorite)
-                }
-
-                if (!state.hasResults) {
-                    Box(
-                        Modifier.fillMaxWidth().padding(Nocturne.space.lg),
-                        contentAlignment = Alignment.Center,
+                Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = listMinHeight)
+                            .padding(horizontal = Nocturne.space.xs, vertical = Nocturne.space.xxs),
+                        verticalArrangement = Arrangement.spacedBy(1.dp),
                     ) {
-                        Text(
-                            "Nenhuma ferramenta encontrada para \"${state.query}\"",
-                            style = Nocturne.type.mono.copy(textAlign = TextAlign.Center),
-                            color = Nocturne.colors.text(0.5f),
-                        )
+                        if (state.favoriteTools.isNotEmpty()) {
+                            SectionHeader("Favoritos", icon = "star", iconFill = true)
+                            ToolList(state.favoriteTools, state, onSelect, onToggleFavorite)
+                        }
+
+                        if (state.recentTools.isNotEmpty()) {
+                            SectionHeader("Recentes", icon = "clock-counter-clockwise")
+                            ToolList(state.recentTools, state, onSelect, onToggleFavorite)
+                        }
+
+                        for ((category, tools) in state.categories) {
+                            SectionHeader(category.label, icon = category.icon)
+                            ToolList(tools, state, onSelect, onToggleFavorite)
+                        }
+
+                        if (!state.hasResults) {
+                            Box(
+                                Modifier.fillMaxWidth().padding(Nocturne.space.lg),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    "Nenhuma ferramenta encontrada para \"${state.query}\"",
+                                    style = Nocturne.type.mono.copy(textAlign = TextAlign.Center),
+                                    color = Nocturne.colors.text(0.5f),
+                                )
+                            }
+                        }
                     }
+
+                    SidebarFooter()
                 }
             }
         }
@@ -111,5 +131,40 @@ private fun ToolList(
             onSelect = { onSelect(tool.id) },
             onToggleFavorite = { onToggleFavorite(tool.id) },
         )
+    }
+}
+
+/**
+ * Rodapé da sidebar: a marca à esquerda e a versão à direita.
+ *
+ * A versão vem do [BuildInfo] gerado pelo Gradle a partir de `gradle.properties` — nunca de
+ * uma constante escrita na UI, que sairia de sincronia com o instalador no primeiro release.
+ */
+@Composable
+private fun SidebarFooter() {
+    val colors = Nocturne.colors
+    Column(Modifier.fillMaxWidth()) {
+        Box(Modifier.fillMaxWidth().height(1.dp).background(colors.divider))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = Nocturne.space.lg,
+                    end = Nocturne.space.lg,
+                    top = Nocturne.space.md,
+                    bottom = Nocturne.space.lg,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Nocturne.space.xs),
+            ) {
+                PhosphorIcon("wrench", size = 12.dp, tint = colors.text(0.45f))
+                Text("DevToolbox", style = Nocturne.type.tag, color = colors.text(0.45f))
+            }
+            Text(BuildInfo.displayVersion, style = Nocturne.type.tag, color = colors.text(0.45f))
+        }
     }
 }

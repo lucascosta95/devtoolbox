@@ -1,5 +1,7 @@
 package dev.devtoolbox.core
 
+import dev.devtoolbox.core.util.EncodedImage
+
 /** Categorias da sidebar, na ordem exata do protótipo. */
 enum class Category(val label: String, val icon: String) {
     Encoding("Encoding", "lock-key"),
@@ -18,6 +20,25 @@ sealed interface ToolInput {
     data class Pair(val left: String, val right: String) : ToolInput
     data class Pattern(val pattern: String, val flags: String, val subject: String) : ToolInput
     data class Seed(val nonce: Int) : ToolInput
+
+    /**
+     * Arquivo escolhido pelo usuário. Diferente das outras, esta entrada tem **etapas**: a
+     * leitura e a codificação acontecem fora da thread de UI, então o estado precisa saber
+     * dizer "carregando" e "falhou" — ver [ImageSelection].
+     */
+    data class Image(val selection: ImageSelection = ImageSelection.Empty) : ToolInput
+}
+
+/** Etapas da seleção de uma imagem, na ordem em que a UI as atravessa. */
+sealed interface ImageSelection {
+    /** Nada escolhido ainda: a UI mostra só a área de arrastar. */
+    data object Empty : ImageSelection
+
+    data class Loading(val fileName: String) : ImageSelection
+
+    data class Failed(val fileName: String, val message: String) : ImageSelection
+
+    data class Loaded(val image: EncodedImage) : ImageSelection
 }
 
 /** Resultado de uma ferramenta: corpo pronto para o composable do arquétipo. */

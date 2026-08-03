@@ -59,6 +59,8 @@ object PhosphorIcons {
         "fingerprint" to Res.drawable.ph_fingerprint,
         "credit-card" to Res.drawable.ph_credit_card,
         "drop-half" to Res.drawable.ph_drop_half,
+        "image" to Res.drawable.ph_image,
+        "image-square" to Res.drawable.ph_image_square,
     )
 
     private val filled: Map<String, DrawableResource> = mapOf(

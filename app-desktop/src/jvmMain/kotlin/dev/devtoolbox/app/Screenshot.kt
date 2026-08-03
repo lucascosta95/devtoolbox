@@ -27,6 +27,11 @@ fun main(args: Array<String>) {
         "cnpj-light" to AppState(selectedId = "cnpj", theme = ThemeMode.Light),
         "busca" to AppState(query = "enc"),
         "busca-validadores" to AppState(query = "valida", selectedId = "card"),
+        "img64-carregado" to AppState(
+            selectedId = "img64",
+            inputs = mapOf("img64" to dev.devtoolbox.core.ToolInput.Image(sampleImage())),
+        ),
+        "rodape" to AppState(query = "qr"),
         "busca-vazia" to AppState(query = "zzz"),
         "accent-teal" to AppState(selectedId = "card", accent = dev.devtoolbox.ds.AccentColor.Teal),
         "accent-amber-light" to AppState(
@@ -61,4 +66,24 @@ fun main(args: Array<String>) {
         }
         scene.close()
     }
+}
+
+/**
+ * Um PNG de verdade (8×8, cinza) só para a screenshot do arquétipo `image` — o encoder do core
+ * é exercitado pelos testes, aqui basta ter bytes válidos.
+ */
+private fun sampleImage(): dev.devtoolbox.core.ImageSelection {
+    val image = java.awt.image.BufferedImage(320, 200, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+    val g = image.createGraphics()
+    g.color = java.awt.Color(0x91, 0x84, 0xD9)
+    g.fillRect(0, 0, 320, 200)
+    g.dispose()
+    val bytes = java.io.ByteArrayOutputStream()
+        .also { javax.imageio.ImageIO.write(image, "png", it) }
+        .toByteArray()
+
+    val result = dev.devtoolbox.core.util.ImageEncoder.encode("logo-devtoolbox.png", bytes)
+    return dev.devtoolbox.core.ImageSelection.Loaded(
+        (result as dev.devtoolbox.core.util.ImageEncodeResult.Ok).image,
+    )
 }

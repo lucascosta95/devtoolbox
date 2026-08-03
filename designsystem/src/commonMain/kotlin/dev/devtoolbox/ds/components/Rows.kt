@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.Nocturne
 
@@ -26,6 +27,8 @@ fun LabelValueRow(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
+    /** O arquétipo `image` usa uma coluna mais estreita — o card dele é curto. */
+    labelWidth: Dp = LABEL_WIDTH,
     trailing: @Composable (() -> Unit)? = null,
 ) {
     Row(
@@ -40,7 +43,7 @@ fun LabelValueRow(
             // JetBrains Mono é mais larga que a Inter: 150 dp já não cabia os labels longos.
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.width(LABEL_WIDTH),
+            modifier = Modifier.width(labelWidth),
         )
         Text(
             value,

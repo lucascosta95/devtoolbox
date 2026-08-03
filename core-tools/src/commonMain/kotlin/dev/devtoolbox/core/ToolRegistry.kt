@@ -9,6 +9,7 @@ import dev.devtoolbox.core.tools.CronTool
 import dev.devtoolbox.core.tools.CurlFormatterTool
 import dev.devtoolbox.core.tools.DiffTool
 import dev.devtoolbox.core.tools.HashTool
+import dev.devtoolbox.core.tools.ImageBase64Tool
 import dev.devtoolbox.core.tools.JsonFormatterTool
 import dev.devtoolbox.core.tools.JwtTool
 import dev.devtoolbox.core.tools.LoremTool
@@ -34,6 +35,7 @@ object ToolRegistry {
         JwtTool,
         UrlTool,
         HashTool,
+        ImageBase64Tool,
         // Formatters
         JsonFormatterTool,
         YamlFormatterTool,

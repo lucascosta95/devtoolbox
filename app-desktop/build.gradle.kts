@@ -54,7 +54,8 @@ compose.desktop.application {
     nativeDistributions {
         targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
         packageName = "DevToolbox"
-        packageVersion = "1.0.0"
+        // Mesma propriedade que alimenta o BuildInfo — versão única para UI e instalador.
+        packageVersion = providers.gradleProperty("devtoolbox.version").get()
         description = "Caixa de ferramentas para desenvolvedores"
         vendor = "DevToolbox"
 

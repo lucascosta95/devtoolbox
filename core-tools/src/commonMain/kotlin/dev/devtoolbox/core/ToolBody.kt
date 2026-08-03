@@ -57,4 +57,21 @@ sealed interface ToolBody {
     ) : ToolBody
 
     data class Qr(val value: String, val modules: List<List<Boolean>>) : ToolBody
+
+    /**
+     * Arquétipo `image`: a área de soltar arquivo, os dados do arquivo carregado, a data URI
+     * e os snippets. [details] nulo = ainda não há imagem (ou a leitura falhou).
+     */
+    data class Image(
+        val details: ImageDetails? = null,
+        val loading: Boolean = false,
+    ) : ToolBody
 }
+
+/** Tudo que a UI mostra de uma imagem já codificada. */
+data class ImageDetails(
+    val rows: List<Row>,
+    val dataUri: String,
+    /** `label` é a linguagem ("HTML", "CSS") e `value`, o código inteiro. */
+    val snippets: List<Row>,
+)

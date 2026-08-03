@@ -29,7 +29,7 @@ class IconCoverageTest {
         // Ícones usados pela moldura da app, que não vêm do registro de ferramentas.
         val chrome = listOf(
             "wrench", "magnifying-glass", "star", "clock-counter-clockwise",
-            "sun", "moon", "arrow-right", "check", "copy", "x-circle", "drop-half",
+            "sun", "moon", "arrow-right", "check", "copy", "x-circle", "drop-half", "image-square",
         )
         val missing = chrome.filterNot { it in PhosphorIcons.names }
         assertTrue(missing.isEmpty(), "ícones da moldura sem recurso: $missing")

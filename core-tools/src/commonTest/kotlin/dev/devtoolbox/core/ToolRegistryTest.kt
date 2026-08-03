@@ -39,7 +39,9 @@ class ToolRegistryTest {
 
     @Test
     fun searchesByName() {
-        assertEquals(listOf("base64"), ToolRegistry.search("base64").map { it.id })
+        // "Imagem → Base64" também casa — a busca é por `contains` no nome inteiro.
+        assertEquals(listOf("base64", "img64"), ToolRegistry.search("base64").map { it.id })
+        assertEquals(listOf("hash"), ToolRegistry.search("hash generator").map { it.id })
     }
 
     @Test

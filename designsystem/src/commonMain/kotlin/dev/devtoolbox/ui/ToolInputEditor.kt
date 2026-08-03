@@ -23,7 +23,7 @@ import dev.devtoolbox.ds.components.TextField
  * Editor da entrada, escolhido pela variante de [ToolInput].
  *
  * O arquétipo `io` não usa este composable: lá a entrada já vive no card da esquerda.
- * `Seed` também não aparece — quem regenera é o botão do próprio layout.
+ * `Seed` e `Image` também não aparecem — quem conduz é o botão do próprio layout.
  */
 @Composable
 fun ToolInputEditor(
@@ -114,6 +114,8 @@ fun ToolInputEditor(
             }
         }
 
-        is ToolInput.Seed -> Unit
+        // Nem `Seed` nem `Image` têm editor: quem conduz é o próprio layout (o botão de
+        // regenerar e a área de soltar arquivo, respectivamente).
+        is ToolInput.Seed, is ToolInput.Image -> Unit
     }
 }
