@@ -39,8 +39,9 @@ object ImageBase64Tool : Tool {
             // usuário o caminho para tentar outro arquivo.
             is ImageSelection.Failed ->
                 ToolOutput.Failure(selection.message, ToolBody.Image())
-            is ImageSelection.Loaded ->
-                ToolOutput.Success(ToolBody.Image(details = detailsOf(selection.image)))
+            is ImageSelection.Loaded -> ToolOutput.Success(
+                ToolBody.Image(details = detailsOf(selection.image), source = selection.image),
+            )
         }
     }
 

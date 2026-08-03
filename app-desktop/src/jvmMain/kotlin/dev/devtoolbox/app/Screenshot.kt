@@ -32,6 +32,10 @@ fun main(args: Array<String>) {
             inputs = mapOf("img64" to dev.devtoolbox.core.ToolInput.Image(sampleImage())),
         ),
         "rodape" to AppState(query = "qr"),
+        "img64-transparencia" to AppState(
+            selectedId = "img64",
+            inputs = mapOf("img64" to dev.devtoolbox.core.ToolInput.Image(sampleImage(alpha = true))),
+        ),
         "busca-vazia" to AppState(query = "zzz"),
         "accent-teal" to AppState(selectedId = "card", accent = dev.devtoolbox.ds.AccentColor.Teal),
         "accent-amber-light" to AppState(
@@ -72,11 +76,17 @@ fun main(args: Array<String>) {
  * Um PNG de verdade (8×8, cinza) só para a screenshot do arquétipo `image` — o encoder do core
  * é exercitado pelos testes, aqui basta ter bytes válidos.
  */
-private fun sampleImage(): dev.devtoolbox.core.ImageSelection {
+private fun sampleImage(alpha: Boolean = false): dev.devtoolbox.core.ImageSelection {
     val image = java.awt.image.BufferedImage(320, 200, java.awt.image.BufferedImage.TYPE_INT_ARGB)
     val g = image.createGraphics()
-    g.color = java.awt.Color(0x91, 0x84, 0xD9)
-    g.fillRect(0, 0, 320, 200)
+    if (alpha) {
+        // Círculo opaco sobre fundo transparente: é o que prova o xadrez atrás do preview.
+        g.color = java.awt.Color(0xD9, 0xA5, 0x44)
+        g.fillOval(60, 20, 160, 160)
+    } else {
+        g.color = java.awt.Color(0x91, 0x84, 0xD9)
+        g.fillRect(0, 0, 320, 200)
+    }
     g.dispose()
     val bytes = java.io.ByteArrayOutputStream()
         .also { javax.imageio.ImageIO.write(image, "png", it) }

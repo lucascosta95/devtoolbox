@@ -61,6 +61,8 @@ object PhosphorIcons {
         "drop-half" to Res.drawable.ph_drop_half,
         "image" to Res.drawable.ph_image,
         "image-square" to Res.drawable.ph_image_square,
+        "arrows-clockwise" to Res.drawable.ph_arrows_clockwise,
+        "trash" to Res.drawable.ph_trash,
     )
 
     private val filled: Map<String, DrawableResource> = mapOf(

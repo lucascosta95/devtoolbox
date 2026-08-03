@@ -1,5 +1,7 @@
 package dev.devtoolbox.core
 
+import dev.devtoolbox.core.util.EncodedImage
+
 /** Linha label/valor dos arquétipos `list`, `listgen` e `validate`. */
 data class Row(val label: String, val value: String, val swatch: String? = null)
 
@@ -64,6 +66,8 @@ sealed interface ToolBody {
      */
     data class Image(
         val details: ImageDetails? = null,
+        /** A imagem em si — é dela que sai o preview da área de arraste. */
+        val source: EncodedImage? = null,
         val loading: Boolean = false,
     ) : ToolBody
 }

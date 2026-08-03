@@ -25,6 +25,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,10 @@ fun OutlinedButton(
     /** `false` = variante fantasma: sem borda, só hover. */
     bordered: Boolean = true,
     contentColor: Color = Nocturne.colors.text,
+    textStyle: TextStyle = Nocturne.type.mono,
+    iconSize: Dp = 14.dp,
+    contentPadding: PaddingValues =
+        PaddingValues(horizontal = Nocturne.space.md, vertical = Nocturne.space.xs),
 ) {
     val colors = Nocturne.colors
     val interaction = remember { MutableInteractionSource() }
@@ -64,7 +69,9 @@ fun OutlinedButton(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Nocturne.space.xs),
+        // Centralizado: quando o botão é esticado (`weight`), o conteúdo não fica encostado
+        // na borda esquerda; sem espaço sobrando, não muda nada.
+        horizontalArrangement = Arrangement.spacedBy(Nocturne.space.xs, Alignment.CenterHorizontally),
         modifier = modifier
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .onFocusChanged { focused = it.isFocused }
@@ -89,12 +96,41 @@ fun OutlinedButton(
                 enabled = enabled,
                 onClick = onClick,
             )
-            .padding(horizontal = Nocturne.space.md, vertical = Nocturne.space.xs),
+            .padding(contentPadding),
     ) {
-        if (icon != null) PhosphorIcon(icon, size = 14.dp, tint = contentColor, fill = iconFill)
-        Text(label, style = Nocturne.type.mono, color = contentColor)
+        if (icon != null) PhosphorIcon(icon, size = iconSize, tint = contentColor, fill = iconFill)
+        // Rótulo vazio = botão só de ícone; um `Text("")` ainda ocuparia a largura do espaçamento.
+        if (label.isNotEmpty()) Text(label, style = textStyle, color = contentColor)
     }
 }
+
+/**
+ * Variante `.btn-ghost`: sem borda, compacta — as ações que acompanham um conteúdo
+ * (trocar/remover a imagem) em vez de comandarem a tela.
+ */
+@Composable
+fun GhostButton(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: String? = null,
+    contentDescription: String? = null,
+) = OutlinedButton(
+    label = label,
+    onClick = onClick,
+    modifier = if (contentDescription != null) {
+        modifier.semantics { this.contentDescription = contentDescription }
+    } else {
+        modifier
+    },
+    icon = icon,
+    bordered = false,
+    accentBorder = false,
+    contentColor = Nocturne.colors.text(0.7f),
+    textStyle = Nocturne.type.tag,
+    iconSize = 13.dp,
+    contentPadding = PaddingValues(horizontal = Nocturne.space.xs, vertical = 4.dp),
+)
 
 /** Variante `.btn-secondary`: borda neutra, para ações de apoio ("Gerar novo exemplo"). */
 @Composable

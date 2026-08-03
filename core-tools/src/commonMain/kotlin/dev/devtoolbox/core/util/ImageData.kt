@@ -25,15 +25,22 @@ enum class ImageFormat(val mime: String, val label: String, val extensions: List
     }
 }
 
-/** Imagem já codificada, pronta para a UI. [base64] não inclui o prefixo `data:`. */
-data class EncodedImage(
+/**
+ * Imagem já codificada, pronta para a UI. [base64] não inclui o prefixo `data:`.
+ *
+ * [bytes] é o arquivo original, guardado para o preview: decodificar o Base64 de volta na hora
+ * de desenhar custaria uma passada por megabytes de string a cada troca de ferramenta.
+ */
+class EncodedImage(
     val fileName: String,
     val format: ImageFormat,
     val width: Int?,
     val height: Int?,
-    val originalBytes: Int,
+    val bytes: ByteArray,
     val base64: String,
 ) {
+    val originalBytes: Int get() = bytes.size
+
     val mime: String get() = format.mime
 
     val dataUri: String get() = "data:$mime;base64,$base64"
@@ -46,6 +53,18 @@ data class EncodedImage(
 
     val dimensions: String?
         get() = if (width != null && height != null) "$width × $height px" else null
+
+    /**
+     * Igualdade por identidade do conteúdo: comparar megabytes de `bytes` a cada emissão de
+     * estado seria caro e não diria nada a mais — duas seleções só são "a mesma" quando são
+     * o mesmo carregamento.
+     */
+    override fun equals(other: Any?): Boolean = this === other
+
+    override fun hashCode(): Int = fileName.hashCode() * 31 + bytes.size
+
+    override fun toString(): String =
+        "EncodedImage($fileName, ${format.label}, ${width}x$height, ${bytes.size} B)"
 }
 
 sealed interface ImageEncodeResult {
@@ -79,7 +98,7 @@ object ImageEncoder {
                 format = format,
                 width = size?.first,
                 height = size?.second,
-                originalBytes = bytes.size,
+                bytes = bytes,
                 base64 = Base64.encodeBytes(bytes),
             ),
         )

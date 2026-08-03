@@ -9,7 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draganddrop.awtTransferable
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.res.loadSvgPainter
+import androidx.compose.ui.unit.Density
+import dev.devtoolbox.core.util.EncodedImage
 import dev.devtoolbox.core.util.ImageFormat
+import org.jetbrains.skia.Image
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -92,3 +99,17 @@ private fun File.asPickedFile() = PickedFile(name) { withContext(Dispatchers.IO)
 
 private fun String.hasImageExtension(): Boolean =
     substringAfterLast('.', "").lowercase() in ImageFormat.allExtensions
+
+/**
+ * Raster pela Skia e SVG pelo leitor do Compose.
+ *
+ * `makeFromEncoded` cobre PNG, JPEG, GIF, WebP, BMP e ICO, mas não entende SVG — que é texto,
+ * não pixel, e precisa do rasterizador vetorial.
+ */
+actual fun decodeImage(image: EncodedImage, density: Density): Painter? = runCatching {
+    if (image.format == ImageFormat.Svg) {
+        loadSvgPainter(image.bytes.inputStream(), density)
+    } else {
+        BitmapPainter(Image.makeFromEncoded(image.bytes).toComposeImageBitmap())
+    }
+}.getOrNull()

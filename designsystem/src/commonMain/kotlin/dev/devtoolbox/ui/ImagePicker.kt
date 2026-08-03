@@ -2,7 +2,10 @@ package dev.devtoolbox.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.Density
 import dev.devtoolbox.core.ImageSelection
+import dev.devtoolbox.core.util.EncodedImage
 import dev.devtoolbox.core.util.ImageEncodeResult
 import dev.devtoolbox.core.util.ImageEncoder
 import kotlinx.coroutines.CoroutineDispatcher
@@ -30,8 +33,17 @@ expect fun Modifier.imageDropTarget(
     onFileDropped: (PickedFile) -> Unit,
 ): Modifier
 
-/** Dispatcher de trabalho da plataforma — `Dispatchers.Default` em todas as atuais. */
+/** Dispatcher de trabalho da plataforma. */
 expect val ioDispatcher: CoroutineDispatcher
+
+/**
+ * Converte os bytes do arquivo em algo desenhável — `null` quando a plataforma não sabe ler
+ * aquele formato.
+ *
+ * Fica fora do core porque decodificar imagem é serviço de plataforma: no desktop é a Skia
+ * para os formatos raster e o leitor de SVG do Compose para o vetorial.
+ */
+expect fun decodeImage(image: EncodedImage, density: Density): Painter?
 
 /**
  * Lê e codifica o arquivo fora da thread de UI.

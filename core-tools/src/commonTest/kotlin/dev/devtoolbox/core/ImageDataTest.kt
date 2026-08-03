@@ -9,7 +9,10 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class ImageDataTest {
@@ -237,6 +240,62 @@ class ImageDataTest {
 
         assertEquals("A imagem tem 8,0 MB — o limite é 5,0 MB.", output.message)
         assertEquals(ToolBody.Image(), output.body)
+    }
+
+    @Test
+    fun keepsTheOriginalBytesForThePreview() {
+        val original = png(320, 200)
+        val image = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("logo.png", original)).image
+
+        // O preview desenha estes bytes; decodificar o Base64 de volta a cada quadro seria caro.
+        assertEquals(original.toList(), image.bytes.toList())
+        assertEquals(original.size, image.originalBytes)
+    }
+
+    @Test
+    fun twoLoadsOfTheSameFileAreDistinctSelections() {
+        val bytes = png(8, 8)
+        val first = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("a.png", bytes)).image
+        val second = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("a.png", bytes)).image
+
+        // Igualdade por identidade: comparar megabytes a cada emissão de estado não paga.
+        assertEquals(first, first)
+        assertNotEquals(first, second)
+    }
+
+    @Test
+    fun toolExposesTheImageAsThePreviewSource() {
+        val image = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("logo.png", png(64, 64))).image
+        val output = ImageBase64Tool.run(ToolInput.Image(ImageSelection.Loaded(image)))
+        val body = assertIs<ToolOutput.Success>(output).body as ToolBody.Image
+
+        assertSame(image, body.source)
+    }
+
+    @Test
+    fun removingTheImageClearsEverything() {
+        val image = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("logo.png", png(64, 64))).image
+        val loaded = ImageBase64Tool.run(ToolInput.Image(ImageSelection.Loaded(image)))
+        assertNotNull((assertIs<ToolOutput.Success>(loaded).body as ToolBody.Image).details)
+
+        // O botão de remover devolve a seleção para `Empty`: some o preview, o card de
+        // metadados, a data URI e os snippets de uma vez só.
+        val cleared = ImageBase64Tool.run(ToolInput.Image(ImageSelection.Empty))
+        val body = assertIs<ToolOutput.Success>(cleared).body as ToolBody.Image
+
+        assertNull(body.details)
+        assertNull(body.source)
+        assertEquals(ToolBody.Image(), body)
+    }
+
+    @Test
+    fun loadingAndFailureDoNotCarryAPreview() {
+        val loading = ImageBase64Tool.run(ToolInput.Image(ImageSelection.Loading("a.png")))
+        assertNull((assertIs<ToolOutput.Success>(loading).body as ToolBody.Image).source)
+
+        val failed = ImageSelection.Failed("a.psd", "Formato não suportado.")
+        val body = assertIs<ToolOutput.Failure>(ImageBase64Tool.run(ToolInput.Image(failed))).body
+        assertNull((body as ToolBody.Image).source)
     }
 
     @Test
