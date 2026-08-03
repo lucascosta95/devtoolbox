@@ -1,53 +1,126 @@
 package dev.devtoolbox.ds.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.Nocturne
+import dev.devtoolbox.ds.focusRing
 import kotlinx.coroutines.delay
 
 /** Duração do feedback de "Copiado", igual ao protótipo. */
-private const val COPIED_FEEDBACK_MS = 1300L
+const val COPIED_FEEDBACK_MS = 1300L
 
 /**
- * Botão fantasma "Copiar": escreve no clipboard e vira ✓ "Copiado" por 1.3 s.
+ * Qual botão está mostrando "Copiado" — **um por vez** em toda a aplicação.
  *
- * O estado do feedback é local ao botão — não suja o [dev.devtoolbox.core] nem o AppState.
+ * O protótipo guarda um único `copiedKey`; com um botão de copiar em cada valor exibido, dois
+ * feedbacks simultâneos deixariam dúvida sobre o que foi de fato para a área de transferência.
+ */
+@Stable
+class CopyFeedbackState {
+    var copiedKey: String? by mutableStateOf(null)
+        private set
+
+    fun markCopied(key: String) {
+        copiedKey = key
+    }
+
+    fun clear(key: String) {
+        if (copiedKey == key) copiedKey = null
+    }
+}
+
+val LocalCopyFeedback = staticCompositionLocalOf { CopyFeedbackState() }
+
+/**
+ * Botão fantasma de copiar: escreve no clipboard e vira ✓ por 1.3 s.
+ *
+ * [copyKey] identifica o botão no feedback compartilhado — precisa ser único na tela
+ * (normalmente `"${toolId}-${papel}"`, com o índice quando é uma lista).
  */
 @Composable
 fun CopyButton(
     text: String,
+    copyKey: String,
     modifier: Modifier = Modifier,
-    label: String = "Copiar",
+    /** `null` = só o ícone, o padrão do handoff; com texto vira "Copiar" / "Copiado". */
+    label: String? = null,
     copiedLabel: String = "Copiado",
+    contentDescription: String = "Copiar",
 ) {
     val clipboard = LocalClipboardManager.current
-    var copied by remember { mutableStateOf(false) }
+    val feedback = LocalCopyFeedback.current
+    val copied = feedback.copiedKey == copyKey
+
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
+    var focused by remember { mutableStateOf(false) }
 
     LaunchedEffect(copied) {
         if (copied) {
             delay(COPIED_FEEDBACK_MS)
-            copied = false
+            feedback.clear(copyKey)
         }
     }
 
-    OutlinedButton(
-        label = if (copied) copiedLabel else label,
-        icon = if (copied) "check" else "copy",
-        // Fantasma, como no protótipo: só ganha presença enquanto mostra "Copiado".
-        bordered = copied,
-        accentBorder = copied,
-        contentColor = if (copied) Nocturne.colors.onAccentSurface else Nocturne.colors.text(0.7f),
-        onClick = {
-            clipboard.setText(AnnotatedString(text))
-            copied = true
-        },
-        modifier = modifier,
-    )
+    val colors = Nocturne.colors
+    val contentColor = if (copied) colors.onAccentSurface else colors.text(0.7f)
+    val fill = when {
+        pressed -> colors.accentPressed.copy(alpha = 0.18f)
+        hovered || copied -> colors.hoverTint
+        else -> Color.Transparent
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Nocturne.space.xs),
+        modifier = modifier
+            .onFocusChanged { focused = it.isFocused }
+            .focusRing(focused, Nocturne.radii.sm)
+            .clip(RoundedCornerShape(Nocturne.radii.sm))
+            .background(fill)
+            .hoverable(interaction)
+            .clickable(interactionSource = interaction, indication = null) {
+                clipboard.setText(AnnotatedString(text))
+                feedback.markCopied(copyKey)
+            }
+            .semantics { this.contentDescription = if (copied) copiedLabel else contentDescription }
+            // 3×6 px quando é só ícone, como o `.btn-ghost` compacto do protótipo.
+            .padding(horizontal = if (label == null) 6.dp else 8.dp, vertical = 3.dp),
+    ) {
+        PhosphorIcon(if (copied) "check" else "copy", size = 13.dp, tint = contentColor)
+        if (label != null) {
+            Text(
+                if (copied) copiedLabel else label,
+                style = Nocturne.type.mono,
+                color = contentColor,
+            )
+        }
+    }
 }

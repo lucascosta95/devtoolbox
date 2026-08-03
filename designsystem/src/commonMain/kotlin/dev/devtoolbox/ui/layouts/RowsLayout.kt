@@ -26,12 +26,13 @@ import dev.devtoolbox.ds.components.SecondaryButton
 /**
  * Arquétipos `list` e `listgen`: linhas label/valor separadas por divisor.
  *
- * Com [ToolBody.Rows.regenerable] aparece "Gerar novo exemplo" e cada linha ganha um botão
- * de copiar — é o que separa `listgen` de `list` no handoff.
+ * Toda linha tem botão de copiar; o que [ToolBody.Rows.regenerable] muda é apenas a presença
+ * do "Gerar novo exemplo".
  */
 @Composable
 fun RowsLayout(
     body: ToolBody.Rows,
+    toolId: String,
     onRegenerate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -51,10 +52,12 @@ fun RowsLayout(
                 LabelValueRow(
                     label = row.label,
                     value = row.value,
-                    trailing = if (body.regenerable) {
-                        { CopyButton(row.value, label = "") }
-                    } else {
-                        null
+                    trailing = {
+                        CopyButton(
+                            row.value,
+                            "$toolId-row$index",
+                            contentDescription = "Copiar ${row.label}",
+                        )
                     },
                 )
                 if (index != body.rows.lastIndex) Divider()

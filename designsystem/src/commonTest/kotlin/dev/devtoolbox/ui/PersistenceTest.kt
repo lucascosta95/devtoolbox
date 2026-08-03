@@ -3,6 +3,7 @@ package dev.devtoolbox.ui
 import dev.devtoolbox.core.persistence.InMemoryStateStore
 import dev.devtoolbox.core.persistence.PersistedState
 import dev.devtoolbox.core.persistence.StateCodec
+import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.ThemeMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
@@ -22,6 +23,7 @@ class PersistenceTest {
             favorites = listOf("base64", "json"),
             recent = listOf("cron", "uuid"),
             theme = "light",
+            accent = "teal",
         )
         assertEquals(state, StateCodec.decode(StateCodec.encode(state)))
     }
@@ -101,6 +103,28 @@ class PersistenceTest {
         advanceTimeBy(PERSIST_DEBOUNCE_MS + 50)
 
         assertEquals(before, store.saveCount, "entrada do usuário não deveria ir para disco")
+    }
+
+    @Test
+    fun accentChoiceSurvivesARoundTripThroughTheStore() = runTest {
+        val store = InMemoryStateStore()
+        val vm = AppViewModel(backgroundScope, AppState(), store)
+
+        vm.selectAccent(AccentColor.Amber)
+        advanceTimeBy(PERSIST_DEBOUNCE_MS + 50)
+        assertEquals("amber", store.load()?.accent)
+
+        // E volta como enum na próxima abertura.
+        assertEquals(
+            AccentColor.Amber,
+            AppViewModel(backgroundScope, AppState(), store).state.value.accent,
+        )
+    }
+
+    @Test
+    fun anUnknownAccentIdFallsBackToTheDefault() {
+        val state = AppState().mergedWith(PersistedState(accent = "fucsia-neon"))
+        assertEquals(AccentColor.default, state.accent)
     }
 
     @Test

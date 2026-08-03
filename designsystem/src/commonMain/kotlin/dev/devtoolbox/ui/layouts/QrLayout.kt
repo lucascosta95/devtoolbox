@@ -33,7 +33,7 @@ import dev.devtoolbox.ds.components.Text
  * contraste; inverter no tema escuro quebraria a leitura.
  */
 @Composable
-fun QrLayout(body: ToolBody.Qr, modifier: Modifier = Modifier) {
+fun QrLayout(body: ToolBody.Qr, toolId: String, modifier: Modifier = Modifier) {
     // Módulo menor = zona de silêncio menor, já que ela é 4 × módulo.
     val cellSize = 7.dp
     // A norma exige uma zona de silêncio de **4 módulos**; sem ela muitos leitores não
@@ -78,7 +78,7 @@ fun QrLayout(body: ToolBody.Qr, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(Nocturne.space.sm),
         ) {
             Card {
-                CardKicker("Conteúdo") { CopyButton(body.value, label = "Copiar link") }
+                CardKicker("Conteúdo") { CopyButton(body.value, "$toolId-link", label = "Copiar link") }
                 Box(Modifier.padding(top = Nocturne.space.xs)) {
                     Text(body.value, style = Nocturne.type.mono)
                 }

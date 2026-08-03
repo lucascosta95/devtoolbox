@@ -17,20 +17,24 @@ import dev.devtoolbox.core.ToolBody
 import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.components.Card
 import dev.devtoolbox.ds.components.CardKicker
+import dev.devtoolbox.ds.components.CopyButton
 import dev.devtoolbox.ds.components.Tag
 import dev.devtoolbox.ds.components.Text
 
 /** Arquétipo `regex`: o padrão, a string de teste com os trechos casados e a lista de matches. */
 @Composable
-fun RegexLayout(body: ToolBody.Regex, modifier: Modifier = Modifier) {
+fun RegexLayout(body: ToolBody.Regex, toolId: String, modifier: Modifier = Modifier) {
     val colors = Nocturne.colors
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Nocturne.space.sm)) {
         Card {
-            CardKicker("Padrão")
+            val pattern = "/${body.pattern}/${body.flags}"
+            CardKicker("Padrão") {
+                CopyButton(pattern, "$toolId-pattern", contentDescription = "Copiar padrão")
+            }
             Box(Modifier.padding(top = Nocturne.space.xs)) {
                 Text(
-                    "/${body.pattern}/${body.flags}",
-                    style = Nocturne.type.body.copy(fontFamily = Nocturne.type.mono.fontFamily),
+                    pattern,
+                    style = Nocturne.type.body,
                     color = colors.onAccentSurface,
                 )
             }
@@ -74,13 +78,23 @@ fun RegexLayout(body: ToolBody.Regex, modifier: Modifier = Modifier) {
                     Modifier.padding(top = Nocturne.space.xs),
                     verticalArrangement = Arrangement.spacedBy(Nocturne.space.xs),
                 ) {
-                    for (match in body.matches) {
+                    for ((index, match) in body.matches.withIndex()) {
                         Row(
+                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(Nocturne.space.sm),
                         ) {
                             Tag("${match.index}", accent = true)
-                            Text(match.value, style = Nocturne.type.mono)
+                            Text(
+                                match.value,
+                                style = Nocturne.type.mono,
+                                modifier = Modifier.weight(1f),
+                            )
+                            CopyButton(
+                                match.value,
+                                "$toolId-match$index",
+                                contentDescription = "Copiar correspondência ${match.index}",
+                            )
                         }
                     }
                 }

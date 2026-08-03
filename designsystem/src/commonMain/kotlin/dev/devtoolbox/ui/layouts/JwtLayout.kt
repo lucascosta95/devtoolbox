@@ -29,11 +29,13 @@ import dev.devtoolbox.ds.components.Text
  * assinatura no texto a 45%.
  */
 @Composable
-fun JwtLayout(body: ToolBody.Jwt, modifier: Modifier = Modifier) {
+fun JwtLayout(body: ToolBody.Jwt, toolId: String, modifier: Modifier = Modifier) {
     val colors = Nocturne.colors
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Nocturne.space.sm)) {
         Card {
-            CardKicker("Token") { CopyButton(token(body)) }
+            CardKicker("Token") {
+                CopyButton(token(body), "$toolId-token", contentDescription = "Copiar token")
+            }
             Box(Modifier.padding(top = Nocturne.space.xs)) {
                 Text(
                     buildAnnotatedString {
@@ -52,8 +54,8 @@ fun JwtLayout(body: ToolBody.Jwt, modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(Nocturne.space.sm),
         ) {
-            DecodedCard("Header", body.headerJson, Modifier.weight(1f))
-            DecodedCard("Payload", body.payloadJson, Modifier.weight(1f))
+            DecodedCard("Header", body.headerJson, "$toolId-header", Modifier.weight(1f))
+            DecodedCard("Payload", body.payloadJson, "$toolId-payload", Modifier.weight(1f))
         }
 
         Text(
@@ -65,9 +67,14 @@ fun JwtLayout(body: ToolBody.Jwt, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun DecodedCard(kicker: String, json: String, modifier: Modifier = Modifier) {
+private fun DecodedCard(
+    kicker: String,
+    json: String,
+    copyKey: String,
+    modifier: Modifier = Modifier,
+) {
     Card(modifier.fillMaxHeight()) {
-        CardKicker(kicker) { CopyButton(json) }
+        CardKicker(kicker) { CopyButton(json, copyKey, contentDescription = "Copiar $kicker") }
         Box(Modifier.padding(top = Nocturne.space.xs)) {
             Text(json, style = Nocturne.type.mono, color = Nocturne.colors.text(0.9f))
         }

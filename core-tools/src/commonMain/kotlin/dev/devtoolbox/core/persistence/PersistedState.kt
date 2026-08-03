@@ -17,6 +17,8 @@ data class PersistedState(
     val recent: List<String> = emptyList(),
     /** "dark" ou "light". */
     val theme: String? = null,
+    /** Id da cor de destaque escolhida ("blurple", "cyan", …). */
+    val accent: String? = null,
     /** Versão do formato — permite migrar sem quebrar instalações antigas. */
     val version: Int = 1,
 )

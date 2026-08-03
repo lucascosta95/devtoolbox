@@ -1,6 +1,7 @@
 package dev.devtoolbox.core
 
 import dev.devtoolbox.core.tools.Base64Tool
+import dev.devtoolbox.core.tools.CardTool
 import dev.devtoolbox.core.tools.CnpjTool
 import dev.devtoolbox.core.tools.ColorTool
 import dev.devtoolbox.core.tools.CpfTool
@@ -52,6 +53,7 @@ object ToolRegistry {
         CpfTool,
         CnpjTool,
         PhoneTool,
+        CardTool,
     )
 
     private val byId: Map<String, Tool> = all.associateBy { it.id }

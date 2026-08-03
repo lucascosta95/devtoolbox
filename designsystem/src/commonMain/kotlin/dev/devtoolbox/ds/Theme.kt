@@ -13,13 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import dev.devtoolbox.ds.resources.Res
-import dev.devtoolbox.ds.resources.inter_medium
-import dev.devtoolbox.ds.resources.inter_regular
+import dev.devtoolbox.ds.resources.jetbrains_mono_italic
+import dev.devtoolbox.ds.resources.jetbrains_mono_medium
 import dev.devtoolbox.ds.resources.jetbrains_mono_regular
+import dev.devtoolbox.ds.resources.jetbrains_mono_semibold
 import org.jetbrains.compose.resources.Font
 
 enum class ThemeMode { Dark, Light;
@@ -58,26 +60,30 @@ object Nocturne {
     val radii: Radii @Composable get() = LocalRadii.current
 }
 
+/**
+ * Família única da aplicação: JetBrains Mono nos pesos 400/500/600, mais o itálico 400.
+ *
+ * Não há mais separação entre fonte de interface e fonte de código — títulos, labels e blocos
+ * de código usam a mesma família, como no protótipo atualizado.
+ */
 @Composable
-private fun interFamily() = FontFamily(
-    Font(Res.font.inter_regular, FontWeight.Normal),
-    Font(Res.font.inter_medium, FontWeight.Medium),
+private fun jetBrainsMono() = FontFamily(
+    Font(Res.font.jetbrains_mono_regular, FontWeight.Normal),
+    Font(Res.font.jetbrains_mono_medium, FontWeight.Medium),
+    Font(Res.font.jetbrains_mono_semibold, FontWeight.SemiBold),
+    Font(Res.font.jetbrains_mono_italic, FontWeight.Normal, FontStyle.Italic),
 )
 
 @Composable
-private fun monoFamily() = FontFamily(Font(Res.font.jetbrains_mono_regular, FontWeight.Normal))
-
-@Composable
 private fun typography(): NocturneTypography {
-    val inter = interFamily()
-    val mono = monoFamily()
-    val base = TextStyle(fontFamily = inter, fontWeight = FontWeight.Normal)
+    val mono = jetBrainsMono()
+    val base = TextStyle(fontFamily = mono, fontWeight = FontWeight.Normal)
     return NocturneTypography(
         toolTitle = base.copy(fontSize = 21.sp, fontWeight = FontWeight.Medium, lineHeight = 26.sp),
-        validatedValue = base.copy(fontFamily = mono, fontSize = 15.sp, lineHeight = 22.sp),
+        validatedValue = base.copy(fontSize = 15.sp, lineHeight = 22.sp),
         body = base.copy(fontSize = 14.sp, lineHeight = 21.sp),
         item = base.copy(fontSize = 13.sp, lineHeight = 18.sp),
-        mono = base.copy(fontFamily = mono, fontSize = 12.5.sp, lineHeight = 20.sp),
+        mono = base.copy(fontSize = 12.5.sp, lineHeight = 20.sp),
         label = base.copy(fontSize = 12.sp, lineHeight = 17.sp),
         tag = base.copy(fontSize = 11.sp, lineHeight = 15.sp),
         sectionHeader = base.copy(
@@ -102,8 +108,12 @@ private fun typography(): NocturneTypography {
  * é pequeno o bastante para viver em `foundation` + estes CompositionLocals.
  */
 @Composable
-fun NocturneTheme(mode: ThemeMode, content: @Composable () -> Unit) {
-    val colors = if (mode == ThemeMode.Dark) DarkColors else LightColors
+fun NocturneTheme(
+    mode: ThemeMode,
+    accent: AccentColor = AccentColor.default,
+    content: @Composable () -> Unit,
+) {
+    val colors = colorsFor(mode, accent)
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalTypography provides typography(),

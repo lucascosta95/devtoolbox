@@ -26,7 +26,14 @@ fun main(args: Array<String>) {
         "tema-light" to AppState(theme = ThemeMode.Light),
         "cnpj-light" to AppState(selectedId = "cnpj", theme = ThemeMode.Light),
         "busca" to AppState(query = "enc"),
+        "busca-validadores" to AppState(query = "valida", selectedId = "card"),
         "busca-vazia" to AppState(query = "zzz"),
+        "accent-teal" to AppState(selectedId = "card", accent = dev.devtoolbox.ds.AccentColor.Teal),
+        "accent-amber-light" to AppState(
+            selectedId = "regex",
+            theme = ThemeMode.Light,
+            accent = dev.devtoolbox.ds.AccentColor.Amber,
+        ),
         "erro-json" to AppState(
             selectedId = "json",
             inputs = mapOf("json" to ToolInput.Text("""{"a": 1, "b" 2}""")),
@@ -42,7 +49,7 @@ fun main(args: Array<String>) {
     )
 
     for ((name, state) in shots) {
-        val scene = ImageComposeScene(width = 1440, height = 900, density = Density(1f)) {
+        val scene = ImageComposeScene(width = 1180, height = 740, density = Density(1f)) {
             App(initialState = state)
         }
         // Dois frames: o primeiro dispara o carregamento assíncrono de fontes e SVGs.

@@ -157,19 +157,24 @@ private fun ToolBodyContent(
     when (body) {
         is ToolBody.Io -> IoLayout(
             body = body,
+            toolId = toolId,
             inputText = (currentInput as? ToolInput.Text)?.value.orEmpty(),
             onInputChange = { text ->
                 val direction = (currentInput as? ToolInput.Text)?.direction ?: Direction.Auto
                 onInputChange(ToolInput.Text(text, direction))
             },
         )
-        is ToolBody.Jwt -> JwtLayout(body)
-        is ToolBody.Rows -> RowsLayout(body, onRegenerate = ::bumpSeed)
-        is ToolBody.Diff -> DiffLayout(body)
-        is ToolBody.Regex -> RegexLayout(body)
+        is ToolBody.Jwt -> JwtLayout(body, toolId)
+        is ToolBody.Rows -> RowsLayout(body, toolId, onRegenerate = ::bumpSeed)
+        is ToolBody.Diff -> DiffLayout(body, toolId)
+        is ToolBody.Regex -> RegexLayout(body, toolId)
         is ToolBody.Validate ->
-            ValidateLayout(body, onTryAnother = { cycleExample(toolId, currentInput, onInputChange) })
-        is ToolBody.Qr -> QrLayout(body)
+            ValidateLayout(
+                body = body,
+                toolId = toolId,
+                onTryAnother = { cycleExample(toolId, currentInput, onInputChange) },
+            )
+        is ToolBody.Qr -> QrLayout(body, toolId)
     }
 }
 
@@ -181,6 +186,12 @@ private val VALIDATOR_EXAMPLES: Map<String, List<String>> = mapOf(
     "cpf" to listOf("529.982.247-25", "111.444.777-30", "111.444.777-35"),
     "cnpj" to listOf("11.222.333/0001-81", "11.222.333/0001-00", "11.222.333/0002-62"),
     "phone" to listOf("(11) 98765-4321", "(21) 3456-789", "(21) 3456-7890"),
+    "card" to listOf(
+        "4539 5789 0080 5000",
+        "5555 5555 5555 4444",
+        "3782 822463 10005",
+        "4539 5789 0080 5001",
+    ),
 )
 
 private fun cycleExample(toolId: String, current: ToolInput, onInputChange: (ToolInput) -> Unit) {

@@ -13,10 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.Nocturne
 
-/** Linha label/valor: label 12 sp em 150.dp a 55%, valor mono 13 sp. */
+/** Coluna de labels — 170 dp acomoda "Dígito verificador" em uma linha na JetBrains Mono. */
+private val LABEL_WIDTH = 170.dp
+
+/** Linha label/valor: label 12 sp a 55%, valor 13 sp. */
 @Composable
 fun LabelValueRow(
     label: String,
@@ -33,11 +37,18 @@ fun LabelValueRow(
             label,
             style = Nocturne.type.label,
             color = Nocturne.colors.text(0.55f),
-            modifier = Modifier.width(150.dp),
+            // JetBrains Mono é mais larga que a Inter: 150 dp já não cabia os labels longos.
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.width(LABEL_WIDTH),
         )
         Text(
             value,
-            style = Nocturne.type.item.copy(fontFamily = Nocturne.type.mono.fontFamily),
+            style = Nocturne.type.item,
+            // Hashes e tokens quebram em várias linhas; passando de três, elipse — o valor
+            // inteiro continua a um clique de distância, no botão de copiar.
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
         trailing?.invoke()

@@ -4,7 +4,7 @@
 
 # DevToolbox
 
-**19 ferramentas de desenvolvimento em um app desktop. Offline, instantâneo, sem telemetria.**
+**20 ferramentas de desenvolvimento em um app desktop. Offline, instantâneo, sem telemetria.**
 
 [![build](https://github.com/lucascosta95/devtoolbox/actions/workflows/build.yml/badge.svg)](https://github.com/lucascosta95/devtoolbox/actions/workflows/build.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)
@@ -33,7 +33,7 @@ para lugar nenhum, e as entradas que você digita nunca são gravadas em disco.
 | **Formatters** | JSON · YAML · cURL · Diff de texto e JSON | 4 |
 | **Text** | String Case (8 formatos) · Regex Tester · Lorem Ipsum | 3 |
 | **Generators** | UUID v4 · Cores (HEX/RGB/HSL/OKLCH) · Timestamp · Cron · QR Code | 5 |
-| **Validators** | CPF · CNPJ · Telefone brasileiro | 3 |
+| **Validators** | CPF · CNPJ · Telefone brasileiro · Cartão de crédito (Luhn) | 4 |
 
 Tudo processa **entrada real**, com recálculo enquanto você digita e erro explicando o que está
 errado — não só "inválido":
@@ -67,7 +67,7 @@ Todos trazem a JVM embutida — **não é preciso ter Java instalado**.
 | `Ctrl/Cmd` + `D` | Favorita a ferramenta ativa |
 | `Ctrl/Cmd` + `Shift` + `L` | Alterna claro/escuro |
 
-Favoritos, recentes, tema e última ferramenta aberta são lembrados entre execuções
+Favoritos, recentes, tema, cor de destaque e última ferramenta aberta são lembrados entre execuções
 (`~/.config/devtoolbox` no Linux, `Application Support` no macOS, `%APPDATA%` no Windows).
 
 <div align="center">
@@ -161,8 +161,8 @@ git tag v1.0.0 && git push origin v1.0.0
 
 ## Créditos
 
-Ícones [Phosphor](https://phosphoricons.com) · tipografia [Inter](https://rsms.me/inter) e
-[JetBrains Mono](https://www.jetbrains.com/lp/mono/) · design system Nocturne.
+Ícones [Phosphor](https://phosphoricons.com) · tipografia
+[JetBrains Mono](https://www.jetbrains.com/lp/mono/) (OFL) · design system Nocturne.
 
 ## Licença
 

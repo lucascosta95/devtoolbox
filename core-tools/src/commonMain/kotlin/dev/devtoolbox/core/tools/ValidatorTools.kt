@@ -9,6 +9,7 @@ import dev.devtoolbox.core.ToolOutput
 import dev.devtoolbox.core.util.BrazilianPhone
 import dev.devtoolbox.core.util.Cnpj
 import dev.devtoolbox.core.util.Cpf
+import dev.devtoolbox.core.util.CreditCard
 import dev.devtoolbox.core.util.ValidationResult
 
 /** Base comum dos três validadores: só muda a função de validação e a copy. */
@@ -69,4 +70,15 @@ val PhoneTool: Tool = object : ValidatorTool(
     defaultValue = "(11) 98765-4321",
 ) {
     override fun validate(text: String) = BrazilianPhone.validate(text)
+}
+
+val CardTool: Tool = object : ValidatorTool(
+    id = "card",
+    name = "Validador de Cartão",
+    icon = "credit-card",
+    description =
+        "Valide um número de cartão de crédito pelo algoritmo de Luhn e identifique a bandeira.",
+    defaultValue = "4539 5789 0080 5000",
+) {
+    override fun validate(text: String) = CreditCard.validate(text)
 }

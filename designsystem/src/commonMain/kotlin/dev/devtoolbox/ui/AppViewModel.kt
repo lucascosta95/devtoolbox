@@ -8,6 +8,7 @@ import dev.devtoolbox.core.ToolRegistry
 import dev.devtoolbox.core.persistence.NoOpStateStore
 import dev.devtoolbox.core.persistence.PersistedState
 import dev.devtoolbox.core.persistence.StateStore
+import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,6 +41,7 @@ data class AppState(
     val favorites: Set<String> = setOf("base64", "json"),
     val recent: List<String> = emptyList(),
     val theme: ThemeMode = ThemeMode.Dark,
+    val accent: AccentColor = AccentColor.default,
     val inputs: Map<String, ToolInput> = emptyMap(),
 ) {
     val selectedTool: Tool get() = ToolRegistry.byId(selectedId) ?: ToolRegistry.default
@@ -141,6 +143,8 @@ class AppViewModel(
 
     fun toggleTheme() = _state.update { it.copy(theme = it.theme.toggled()) }
 
+    fun selectAccent(accent: AccentColor) = _state.update { it.copy(accent = accent) }
+
     fun updateInput(id: String, input: ToolInput) = _state.update {
         it.copy(inputs = it.inputs + (id to input))
     }
@@ -155,6 +159,7 @@ fun AppState.persisted() = PersistedState(
     favorites = favorites.toList().sorted(),
     recent = recent,
     theme = if (theme == ThemeMode.Dark) "dark" else "light",
+    accent = accent.id,
 )
 
 /**
@@ -170,4 +175,6 @@ fun AppState.mergedWith(saved: PersistedState): AppState = copy(
         "dark" -> ThemeMode.Dark
         else -> theme
     },
+    // Uma cor removida do catálogo cai no padrão em vez de deixar o app sem accent.
+    accent = AccentColor.byId(saved.accent) ?: accent,
 )

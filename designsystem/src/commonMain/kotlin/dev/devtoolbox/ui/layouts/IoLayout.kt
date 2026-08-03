@@ -33,6 +33,7 @@ private val CARD_MIN_HEIGHT = 180.dp
 @Composable
 fun IoLayout(
     body: ToolBody.Io,
+    toolId: String,
     inputText: String,
     onInputChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -43,7 +44,9 @@ fun IoLayout(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Card(Modifier.weight(1f).fillMaxHeight()) {
-            CardKicker(body.inputLabel)
+            CardKicker(body.inputLabel) {
+                CopyButton(inputText, "$toolId-in", contentDescription = "Copiar entrada")
+            }
             Box(Modifier.padding(top = Nocturne.space.xs)) {
                 // O campo lê a entrada **ao vivo** do estado, não a saída debounced —
                 // senão a digitação ficaria 150 ms atrasada.
@@ -60,7 +63,7 @@ fun IoLayout(
 
         Card(Modifier.weight(1f).fillMaxHeight()) {
             CardKicker(body.outputLabel) {
-                CopyButton(body.output)
+                CopyButton(body.output, "$toolId-out", label = "Copiar")
             }
             Column(Modifier.padding(top = Nocturne.space.xs)) {
                 Text(

@@ -10,7 +10,7 @@ import dev.devtoolbox.ui.App
 import dev.devtoolbox.ui.createStateStore
 
 fun main() = application {
-    val windowState = rememberWindowState(size = DpSize(1440.dp, 900.dp))
+    val windowState = rememberWindowState(size = DpSize(1180.dp, 740.dp))
     // Favoritos, recentes, tema e última ferramenta sobrevivem entre execuções.
     val store = remember { createStateStore() }
 
@@ -19,7 +19,7 @@ fun main() = application {
         title = "DevToolbox",
         state = windowState,
     ) {
-        window.minimumSize = java.awt.Dimension(1100, 700)
+        window.minimumSize = java.awt.Dimension(1000, 640)
         App(store = store)
     }
 }

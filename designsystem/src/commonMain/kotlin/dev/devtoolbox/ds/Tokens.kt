@@ -44,44 +44,61 @@ data class NocturneColors(
     val bg: Color,
     val surface: Color,
     val text: Color,
-    val accent: Color,
     val divider: Color,
     val isDark: Boolean,
+    /** Derivados da cor escolhida pelo usuário — ver [AccentTokens]. */
+    val accents: AccentTokens,
 ) {
+    val accent: Color get() = accents.accent
+
     /** Texto em opacidade reduzida — o DS usa 70/65/55/50/45% em vários lugares. */
     fun text(alpha: Float): Color = text.copy(alpha = alpha)
 
     /** Tinta de hover: 7% do texto sobre transparente. */
     val hoverTint: Color get() = text.copy(alpha = 0.07f)
 
-    /** Fundo de item selecionado / badge positivo. */
-    val accentSurface: Color get() = if (isDark) Ramp.accent900 else Ramp.accent200
+    /** Fundo de item selecionado / badge positivo (accent-900). */
+    val accentSurface: Color get() = accents.accent900
 
-    /** Texto/ícone sobre [accentSurface] — no dark é accent-300; no light, accent-700. */
-    val onAccentSurface: Color get() = if (isDark) Ramp.accent300 else Ramp.accent700
+    /** Texto/ícone sobre [accentSurface] (accent-300). */
+    val onAccentSurface: Color get() = accents.accent300
+
+    /** Estado pressionado (accent-400). */
+    val accentPressed: Color get() = accents.accent400
 
     /** Fundo neutro de badge negativo / remoção no diff: texto a 8–10%. */
     val mutedSurface: Color get() = text.copy(alpha = 0.08f)
 }
 
-val DarkColors = NocturneColors(
-    bg = Ramp.bgDark,
-    surface = Ramp.surfaceDark,
-    text = Ramp.textDark,
-    accent = Ramp.accent,
-    divider = Ramp.textDark.copy(alpha = 0.16f),
-    isDark = true,
-)
+/** Paleta do tema com a cor de destaque aplicada — os tokens de accent saem da mistura OKLab. */
+fun colorsFor(mode: ThemeMode, accent: AccentColor): NocturneColors {
+    val isDark = mode == ThemeMode.Dark
+    val accents = AccentTokens.derive(accent.color, isDark)
+    return if (isDark) {
+        NocturneColors(
+            bg = Ramp.bgDark,
+            surface = Ramp.surfaceDark,
+            text = Ramp.textDark,
+            divider = Ramp.textDark.copy(alpha = 0.16f),
+            isDark = true,
+            accents = accents,
+        )
+    } else {
+        // Light: override dos mesmos tokens a partir do ramp.
+        NocturneColors(
+            bg = Ramp.neutral100,
+            surface = Ramp.neutral200,
+            text = Ramp.neutral900,
+            divider = Ramp.neutral900.copy(alpha = 0.16f),
+            isDark = false,
+            accents = accents,
+        )
+    }
+}
 
-/** Light: override dos mesmos tokens a partir do ramp; accent inalterado. */
-val LightColors = NocturneColors(
-    bg = Ramp.neutral100,
-    surface = Ramp.neutral200,
-    text = Ramp.neutral900,
-    accent = Ramp.accent,
-    divider = Ramp.neutral900.copy(alpha = 0.16f),
-    isDark = false,
-)
+val DarkColors = colorsFor(ThemeMode.Dark, AccentColor.default)
+
+val LightColors = colorsFor(ThemeMode.Light, AccentColor.default)
 
 /** Escala de espaçamento do DS — densidade 0.7×. */
 @Immutable

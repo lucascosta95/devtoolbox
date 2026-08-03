@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,10 +32,14 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.core.persistence.NoOpStateStore
 import dev.devtoolbox.core.persistence.StateStore
+import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.NocturneTheme
 import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.components.AccentPicker
+import dev.devtoolbox.ds.components.CopyFeedbackState
 import dev.devtoolbox.ds.components.IconButton
+import dev.devtoolbox.ds.components.LocalCopyFeedback
 import dev.devtoolbox.ds.components.PhosphorIcon
 import dev.devtoolbox.ds.components.Text
 
@@ -52,10 +58,13 @@ fun App(
     val searchFocus = remember { FocusRequester() }
     val rootFocus = remember { FocusRequester() }
     var searchFocused by remember { mutableStateOf(false) }
+    // "Copiado" aparece em um botão de cada vez — ver CopyFeedbackState.
+    val copyFeedback = remember { CopyFeedbackState() }
 
     LaunchedEffect(Unit) { runCatching { rootFocus.requestFocus() } }
 
-    NocturneTheme(state.theme) {
+    NocturneTheme(state.theme, state.accent) {
+        CompositionLocalProvider(LocalCopyFeedback provides copyFeedback) {
         Column(
             Modifier
                 .fillMaxSize()
@@ -76,7 +85,12 @@ fun App(
                     )
                 },
         ) {
-            TitleBar(state.theme, onToggleTheme = viewModel::toggleTheme)
+            TitleBar(
+                theme = state.theme,
+                accent = state.accent,
+                onToggleTheme = viewModel::toggleTheme,
+                onSelectAccent = viewModel::selectAccent,
+            )
 
             Row(Modifier.fillMaxSize()) {
                 Sidebar(
@@ -107,6 +121,7 @@ fun App(
                 }
             }
         }
+        }
     }
 }
 
@@ -117,7 +132,12 @@ fun App(
  * a barra custom do protótipo era ilustração.
  */
 @Composable
-private fun TitleBar(theme: ThemeMode, onToggleTheme: () -> Unit) {
+private fun TitleBar(
+    theme: ThemeMode,
+    accent: AccentColor,
+    onToggleTheme: () -> Unit,
+    onSelectAccent: (AccentColor) -> Unit,
+) {
     val colors = Nocturne.colors
     Box(
         Modifier.fillMaxWidth().height(44.dp).background(colors.surface),
@@ -131,12 +151,23 @@ private fun TitleBar(theme: ThemeMode, onToggleTheme: () -> Unit) {
             Text("DevToolbox", style = Nocturne.type.item, color = colors.text(0.65f))
         }
 
-        IconButton(
-            icon = if (theme == ThemeMode.Dark) "sun" else "moon",
-            contentDescription = if (theme == ThemeMode.Dark) "Usar tema claro" else "Usar tema escuro",
-            onClick = onToggleTheme,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Nocturne.space.sm),
             modifier = Modifier.align(Alignment.CenterEnd).padding(end = Nocturne.space.sm),
-        )
+        ) {
+            AccentPicker(selected = accent, onSelect = onSelectAccent)
+
+            // Divisor vertical de 1 × 18 px entre o seletor de cor e o toggle de tema.
+            Box(Modifier.width(1.dp).height(18.dp).background(colors.divider))
+
+            IconButton(
+                icon = if (theme == ThemeMode.Dark) "sun" else "moon",
+                contentDescription =
+                    if (theme == ThemeMode.Dark) "Usar tema claro" else "Usar tema escuro",
+                onClick = onToggleTheme,
+            )
+        }
 
         Box(
             Modifier.fillMaxWidth().height(1.dp)
