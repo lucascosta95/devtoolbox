@@ -1,0 +1,13 @@
+build/
+
+# Plano de implementação — documento de trabalho, fora do repositório.
+PLAN.md
+
+# Gerados pela tarefa `appIcon` a partir do design system.
+app-desktop/src/jvmMain/resources/icons/
+.gradle/
+.kotlin/
+local.properties
+*.log
+.idea/
+.DS_Store

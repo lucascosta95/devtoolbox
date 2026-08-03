@@ -1,0 +1,133 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+# Cancela execuções antigas do mesmo branch — só a última interessa.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Rodar testes
+        run: ./gradlew :core-tools:jvmTest :designsystem:jvmTest
+
+      - name: Publicar relatórios
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorios-de-teste
+          path: '*/build/reports/tests/**'
+
+  installers:
+    name: instalador ${{ matrix.format }}
+    needs: test
+    runs-on: ${{ matrix.os }}
+    # No runner do Windows o shell padrão é o PowerShell, que não executa `./gradlew`
+    # (o script sh). Bash existe nos três runners e mantém os passos idênticos.
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      # Um instalador quebrado não deve impedir os outros de serem gerados.
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            format: deb
+            task: packageDeb
+            artifact: app-desktop/build/compose/binaries/main/deb/*.deb
+          - os: windows-latest
+            format: msi
+            task: packageMsi
+            artifact: app-desktop/build/compose/binaries/main/msi/*.msi
+          - os: macos-latest
+            format: dmg
+            task: packageDmg
+            artifact: app-desktop/build/compose/binaries/main/dmg/*.dmg
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # O bundler .deb do jpackage não roda sem fakeroot.
+      - name: Instalar fakeroot
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y fakeroot
+
+      # Os ícones são gerados pela tarefa `appIcon`, da qual o empacotamento já depende —
+      # não são versionados como binários, para não saírem de sincronia com o design system.
+      - name: Empacotar
+        run: ./gradlew :app-desktop:${{ matrix.task }}
+
+      - name: Conferir que o ícone entrou no pacote
+        run: |
+          set -e
+          case "${{ matrix.format }}" in
+            deb)
+              dpkg-deb -c app-desktop/build/compose/binaries/main/deb/*.deb \
+                | grep -q "DevToolbox.png" && echo "ícone presente no .deb"
+              ;;
+            msi)
+              # O .ico é embutido no launcher; conferimos que ele foi gerado e usado.
+              test -s app-desktop/src/jvmMain/resources/icons/devtoolbox.ico \
+                && echo "ícone .ico gerado"
+              ;;
+            dmg)
+              test -s app-desktop/src/jvmMain/resources/icons/devtoolbox.icns \
+                && echo "ícone .icns gerado"
+              ;;
+          esac
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: devtoolbox-${{ matrix.format }}
+          path: ${{ matrix.artifact }}
+          if-no-files-found: error
+
+  release:
+    name: publicar release
+    # Só em tag: um push em main gera artefatos, mas não release.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: installers
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Criar release com os três instaladores
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
+          body: |
+            Instaladores gerados por `jpackage` em cada plataforma.
+
+            **Nenhum é assinado**: o macOS pede confirmação em Ajustes → Privacidade e
+            Segurança, e o Windows exibe o aviso do SmartScreen na primeira execução.

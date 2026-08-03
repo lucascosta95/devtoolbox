@@ -1,0 +1,191 @@
+package dev.devtoolbox.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import dev.devtoolbox.core.Direction
+import dev.devtoolbox.core.Tool
+import dev.devtoolbox.core.ToolBody
+import dev.devtoolbox.core.ToolInput
+import dev.devtoolbox.core.ToolOutput
+import dev.devtoolbox.ds.Nocturne
+import dev.devtoolbox.ds.components.IconButton
+import dev.devtoolbox.ds.components.PhosphorIcon
+import dev.devtoolbox.ds.components.Tag
+import dev.devtoolbox.ds.components.Text
+import dev.devtoolbox.ui.layouts.DiffLayout
+import dev.devtoolbox.ui.layouts.IoLayout
+import dev.devtoolbox.ui.layouts.JwtLayout
+import dev.devtoolbox.ui.layouts.QrLayout
+import dev.devtoolbox.ui.layouts.RegexLayout
+import dev.devtoolbox.ui.layouts.RowsLayout
+import dev.devtoolbox.ui.layouts.ValidateLayout
+
+/**
+ * Painel de conteúdo: header comum, editor de entrada e o composable do arquétipo.
+ *
+ * Adicionar um arquétipo novo é acrescentar um ramo no `when` de [ToolBodyContent].
+ */
+@Composable
+fun ToolPane(
+    tool: Tool,
+    output: ToolOutput,
+    currentInput: ToolInput,
+    favorite: Boolean,
+    onToggleFavorite: () -> Unit,
+    onInputChange: (ToolInput) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier.fillMaxWidth()) {
+        ToolHeader(tool, favorite, onToggleFavorite)
+
+        val body = when (output) {
+            is ToolOutput.Success -> output.body
+            is ToolOutput.Failure -> output.body
+        }
+
+        // O arquétipo `io` já traz a entrada no card da esquerda; os outros ganham um editor.
+        val ioLayout = body is ToolBody.Io
+        if (!ioLayout) {
+            ToolInputEditor(
+                input = currentInput,
+                onChange = onInputChange,
+                singleLine = tool.singleLineInput,
+                modifier = Modifier.padding(bottom = Nocturne.space.sm),
+            )
+        }
+
+        if (output is ToolOutput.Failure) {
+            ErrorMessage(output.message)
+        }
+
+        when {
+            body != null -> ToolBodyContent(tool.id, body, currentInput, onInputChange)
+            // Sem corpo aproveitável (ex.: JWT malformado): mantém só a entrada e o erro.
+            else -> Unit
+        }
+    }
+}
+
+@Composable
+private fun ToolHeader(tool: Tool, favorite: Boolean, onToggleFavorite: () -> Unit) {
+    val colors = Nocturne.colors
+    Column(Modifier.fillMaxWidth().padding(bottom = Nocturne.space.lg)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Nocturne.space.md),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(Nocturne.radii.md))
+                    .background(colors.accentSurface),
+            ) {
+                PhosphorIcon(tool.icon, size = 19.dp, tint = colors.onAccentSurface)
+            }
+
+            Text(tool.name, style = Nocturne.type.toolTitle)
+            Tag(tool.category.label)
+
+            Box(Modifier.weight(1f))
+
+            IconButton(
+                icon = "star",
+                fill = favorite,
+                contentDescription =
+                    if (favorite) "Remover ${tool.name} dos favoritos" else "Favoritar ${tool.name}",
+                onClick = onToggleFavorite,
+                boxSize = 36.dp,
+                iconSize = 17.dp,
+                tint = if (favorite) colors.accent else colors.text(0.45f),
+            )
+        }
+
+        Text(
+            tool.description,
+            style = Nocturne.type.body,
+            color = colors.text(0.7f),
+            modifier = Modifier.padding(top = Nocturne.space.sm).widthIn(max = 620.dp),
+        )
+    }
+}
+
+@Composable
+private fun ErrorMessage(message: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Nocturne.space.xs),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = Nocturne.space.sm)
+            .clip(RoundedCornerShape(Nocturne.radii.sm))
+            .background(Nocturne.colors.mutedSurface)
+            .padding(horizontal = Nocturne.space.md, vertical = Nocturne.space.xs),
+    ) {
+        PhosphorIcon("x-circle", size = 14.dp, fill = true, tint = Nocturne.colors.text(0.6f))
+        Text(message, style = Nocturne.type.mono, color = Nocturne.colors.text(0.75f))
+    }
+}
+
+@Composable
+private fun ToolBodyContent(
+    toolId: String,
+    body: ToolBody,
+    currentInput: ToolInput,
+    onInputChange: (ToolInput) -> Unit,
+) {
+    /** Regenerar = trocar a semente; é o que alimenta "Gerar novo exemplo". */
+    fun bumpSeed() {
+        val seed = (currentInput as? ToolInput.Seed)?.nonce ?: 0
+        onInputChange(ToolInput.Seed(seed + 1))
+    }
+
+    when (body) {
+        is ToolBody.Io -> IoLayout(
+            body = body,
+            inputText = (currentInput as? ToolInput.Text)?.value.orEmpty(),
+            onInputChange = { text ->
+                val direction = (currentInput as? ToolInput.Text)?.direction ?: Direction.Auto
+                onInputChange(ToolInput.Text(text, direction))
+            },
+        )
+        is ToolBody.Jwt -> JwtLayout(body)
+        is ToolBody.Rows -> RowsLayout(body, onRegenerate = ::bumpSeed)
+        is ToolBody.Diff -> DiffLayout(body)
+        is ToolBody.Regex -> RegexLayout(body)
+        is ToolBody.Validate ->
+            ValidateLayout(body, onTryAnother = { cycleExample(toolId, currentInput, onInputChange) })
+        is ToolBody.Qr -> QrLayout(body)
+    }
+}
+
+/**
+ * Exemplos alternados por ferramenta — o "Testar outro exemplo" do protótipo.
+ * Cada lista alterna entre um valor válido e um inválido.
+ */
+private val VALIDATOR_EXAMPLES: Map<String, List<String>> = mapOf(
+    "cpf" to listOf("529.982.247-25", "111.444.777-30", "111.444.777-35"),
+    "cnpj" to listOf("11.222.333/0001-81", "11.222.333/0001-00", "11.222.333/0002-62"),
+    "phone" to listOf("(11) 98765-4321", "(21) 3456-789", "(21) 3456-7890"),
+)
+
+private fun cycleExample(toolId: String, current: ToolInput, onInputChange: (ToolInput) -> Unit) {
+    val examples = VALIDATOR_EXAMPLES[toolId] ?: return
+    val text = (current as? ToolInput.Text)?.value ?: return
+    val next = examples.getOrNull(examples.indexOf(text) + 1) ?: examples.first()
+    onInputChange(ToolInput.Text(next))
+}
