@@ -83,22 +83,31 @@ jobs:
       - name: Empacotar
         run: ./gradlew :app-desktop:${{ matrix.task }}
 
-      - name: Conferir que o ícone entrou no pacote
+      - name: Conferir o instalador e o ícone
         run: |
-          set -e
+          set -euo pipefail
+
+          installer=$(ls app-desktop/build/compose/binaries/main/${{ matrix.format }}/*.${{ matrix.format }})
+          test -s "$installer"
+          echo "instalador: $installer ($(du -h "$installer" | cut -f1))"
+
           case "${{ matrix.format }}" in
             deb)
-              dpkg-deb -c app-desktop/build/compose/binaries/main/deb/*.deb \
-                | grep -q "DevToolbox.png" && echo "ícone presente no .deb"
+              # Sem pipe para o grep: `grep -q` fecha o pipe no primeiro match e o dpkg-deb
+              # morre com SIGPIPE, o que o pipefail do runner trataria como falha.
+              contents=$(mktemp)
+              dpkg-deb -c "$installer" > "$contents"
+              grep -q "DevToolbox.png" "$contents"
+              grep -q "\.desktop" "$contents"
+              echo "ícone e entrada de menu presentes no .deb"
               ;;
             msi)
-              # O .ico é embutido no launcher; conferimos que ele foi gerado e usado.
-              test -s app-desktop/src/jvmMain/resources/icons/devtoolbox.ico \
-                && echo "ícone .ico gerado"
+              test -s app-desktop/src/jvmMain/resources/icons/devtoolbox.ico
+              echo "ícone .ico gerado e usado pelo jpackage"
               ;;
             dmg)
-              test -s app-desktop/src/jvmMain/resources/icons/devtoolbox.icns \
-                && echo "ícone .icns gerado"
+              test -s app-desktop/src/jvmMain/resources/icons/devtoolbox.icns
+              echo "ícone .icns gerado e usado pelo jpackage"
               ;;
           esac
 
