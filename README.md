@@ -81,7 +81,7 @@ Três módulos, com uma regra que sustenta o resto: **`:core-tools` não conhece
 ```
 :core-tools     lógica pura em commonMain — sem Compose, sem I/O, sem rede
     ↑
-:designsystem   tokens Nocturne, componentes e os 8 arquétipos de layout
+:designsystem   tokens Nocturne, componentes e os 9 arquétipos de layout
     ↑
 :app-desktop    janela, empacotamento, ícones
 ```
@@ -108,15 +108,15 @@ desenhar qualquer ferramenta nova sem uma linha de código de UI.
 ### Zero dependências no core
 
 `:core-tools` não tem nenhuma dependência de runtime. MD5, SHA-1, SHA-256, Base64,
-percent-encoding, JSON, um subset de YAML, cron, conversão OKLCH e o encoder de QR Code são
-implementados no projeto — em `commonMain`, prontos para Android, iOS ou Wasm sem mudar
-uma linha.
+percent-encoding, JSON, um subset de YAML, cron, conversão OKLCH, o algoritmo de Luhn, a leitura
+de cabeçalho de imagem e o encoder de QR Code são implementados no projeto — em `commonMain`,
+prontos para Android, iOS ou Wasm sem mudar uma linha.
 
 ## Desenvolvimento
 
 ```bash
 ./gradlew :app-desktop:run          # roda o app
-./gradlew test                      # 170 testes
+./gradlew test                      # 220 testes
 ./gradlew :app-desktop:screenshot   # renderiza cada tela em PNG, sem abrir display
 ./gradlew :app-desktop:packageDeb   # instalador da plataforma atual
 ```
@@ -137,6 +137,8 @@ Cada transformação e cada validador têm teste, sempre incluindo entradas inv�
 - QR Code cruzado com a **ZXing** (só no classpath de teste — o core segue sem dependências)
 - cor com round-trip HEX ↔ RGB ↔ HSL ↔ OKLCH
 - CPF/CNPJ com dígitos verificadores recalculados por implementação independente no teste
+- cartão de crédito com os números de teste públicos das bandeiras (Luhn)
+- imagem com round-trip encode/decode e detecção de formato por magic bytes
 
 ## CI
 
@@ -147,7 +149,7 @@ Cada transformação e cada validador têm teste, sempre incluindo entradas inv�
 3. **release** apenas em tag `v*`, juntando os três instaladores
 
 ```bash
-git tag v1.0.0 && git push origin v1.0.0
+git tag v1.2.1 && git push origin v1.2.1
 ```
 
 ## Limitações conhecidas
@@ -157,6 +159,7 @@ git tag v1.0.0 && git push origin v1.0.0
   Âncoras, múltiplos documentos, tags e escalares em bloco são recusados com erro explícito
 - **Cron** aceita 5 campos com `*`, número, intervalo, passo e lista — sem `L`, `W`, `#` ou `@daily`
 - **QR Code** em modo byte, correção nível M, versões 1–10 (até 213 bytes)
+- **Imagem → Base64** aceita até 5 MB, em PNG, JPG, GIF, WebP, BMP, ICO e SVG
 - Os instaladores **não são assinados**
 
 ## Créditos
