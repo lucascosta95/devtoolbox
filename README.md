@@ -116,7 +116,7 @@ prontos para Android, iOS ou Wasm sem mudar uma linha.
 
 ```bash
 ./gradlew :app-desktop:run          # roda o app
-./gradlew test                      # 220 testes
+./gradlew test                      # 253 testes
 ./gradlew :app-desktop:screenshot   # renderiza cada tela em PNG, sem abrir display
 ./gradlew :app-desktop:packageDeb   # instalador da plataforma atual
 ```
@@ -149,7 +149,7 @@ Cada transformação e cada validador têm teste, sempre incluindo entradas inv�
 3. **release** apenas em tag `v*`, juntando os três instaladores
 
 ```bash
-git tag v1.2.1 && git push origin v1.2.1
+git tag v1.3.0 && git push origin v1.3.0
 ```
 
 ## Limitações conhecidas
