@@ -45,6 +45,8 @@ object PhosphorIcons {
         "brackets-curly" to Res.drawable.ph_brackets_curly,
         "file-text" to Res.drawable.ph_file_text,
         "terminal-window" to Res.drawable.ph_terminal_window,
+        "database" to Res.drawable.ph_database,
+        "chart-line" to Res.drawable.ph_chart_line,
         "arrows-split" to Res.drawable.ph_arrows_split,
         "paragraph" to Res.drawable.ph_paragraph,
         "identification-badge" to Res.drawable.ph_identification_badge,

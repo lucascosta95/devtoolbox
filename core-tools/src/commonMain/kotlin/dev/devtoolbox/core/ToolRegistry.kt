@@ -13,9 +13,11 @@ import dev.devtoolbox.core.tools.ImageBase64Tool
 import dev.devtoolbox.core.tools.JsonFormatterTool
 import dev.devtoolbox.core.tools.JwtTool
 import dev.devtoolbox.core.tools.LoremTool
+import dev.devtoolbox.core.tools.NrqlFormatterTool
 import dev.devtoolbox.core.tools.PhoneTool
 import dev.devtoolbox.core.tools.QrTool
 import dev.devtoolbox.core.tools.RegexTool
+import dev.devtoolbox.core.tools.SqlFormatterTool
 import dev.devtoolbox.core.tools.StringCaseTool
 import dev.devtoolbox.core.tools.TimestampTool
 import dev.devtoolbox.core.tools.UrlTool
@@ -40,6 +42,8 @@ object ToolRegistry {
         JsonFormatterTool,
         YamlFormatterTool,
         CurlFormatterTool,
+        SqlFormatterTool,
+        NrqlFormatterTool,
         DiffTool,
         // Text
         StringCaseTool,

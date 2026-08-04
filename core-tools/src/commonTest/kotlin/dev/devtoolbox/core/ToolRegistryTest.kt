@@ -79,6 +79,14 @@ class ToolRegistryTest {
     }
 
     @Test
+    fun formattersKeepTheSidebarOrder() {
+        assertEquals(
+            listOf("json", "yaml", "curl", "sql", "nrql", "diff"),
+            ToolRegistry.all.filter { it.category == Category.Formatters }.map { it.id },
+        )
+    }
+
+    @Test
     fun defaultToolIsBase64() {
         assertEquals("base64", ToolRegistry.default.id)
     }

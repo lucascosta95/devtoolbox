@@ -7,8 +7,12 @@ import dev.devtoolbox.core.ToolInput
 import dev.devtoolbox.core.ToolOutput
 import dev.devtoolbox.core.util.Curl
 import dev.devtoolbox.core.util.Diff
+import dev.devtoolbox.core.util.NrqlFormatResult
+import dev.devtoolbox.core.util.SqlFormatResult
 import dev.devtoolbox.core.util.Yaml
 import dev.devtoolbox.core.util.YamlParseException
+import dev.devtoolbox.core.util.formatNrql
+import dev.devtoolbox.core.util.formatSql
 
 object YamlFormatterTool : Tool {
     override val id = "yaml"
@@ -54,6 +58,54 @@ object CurlFormatterTool : Tool {
             ToolOutput.Success(ToolBody.Io(text, Curl.format(text), "Comando", "Formatado"))
         } catch (e: Curl.ParseException) {
             ToolOutput.Failure("cURL inválido: ${e.message}")
+        }
+    }
+}
+
+object SqlFormatterTool : Tool {
+    override val id = "sql"
+    override val name = "SQL Formatter"
+    override val category = Category.Formatters
+    override val icon = "database"
+    override val description = "Indente consultas SQL com palavras-chave em maiúsculas."
+    override val defaultInput = ToolInput.Text(
+        "select u.id, u.name, count(o.id) as total from users u " +
+            "inner join orders o on o.user_id = u.id " +
+            "where u.active = true and o.created_at >= '2026-01-01' " +
+            "group by u.id, u.name having count(o.id) > 3 order by total desc limit 20;",
+    )
+
+    override fun run(input: ToolInput): ToolOutput {
+        val text = (input as? ToolInput.Text)?.value ?: return ToolOutput.Failure("Entrada inválida.")
+        if (text.isBlank()) return ToolOutput.Success(ToolBody.Io(text, "", "SQL", "SQL formatado"))
+        return when (val result = formatSql(text)) {
+            is SqlFormatResult.Success ->
+                ToolOutput.Success(ToolBody.Io(text, result.sql, "SQL", "SQL formatado"))
+            is SqlFormatResult.Failure -> ToolOutput.Failure(result.message)
+        }
+    }
+}
+
+object NrqlFormatterTool : Tool {
+    override val id = "nrql"
+    override val name = "NRQL Formatter"
+    override val category = Category.Formatters
+    override val icon = "chart-line"
+    override val description = "Indente consultas NRQL (New Relic) e similares de observabilidade."
+    override val defaultInput = ToolInput.Text(
+        "select count(*), average(duration) from Transaction " +
+            "where appName = 'checkout-api' and httpResponseCode != '200' " +
+            "facet name, host since 3 hours ago until 30 minutes ago " +
+            "timeseries 5 minutes limit 50",
+    )
+
+    override fun run(input: ToolInput): ToolOutput {
+        val text = (input as? ToolInput.Text)?.value ?: return ToolOutput.Failure("Entrada inválida.")
+        if (text.isBlank()) return ToolOutput.Success(ToolBody.Io(text, "", "NRQL", "NRQL formatado"))
+        return when (val result = formatNrql(text)) {
+            is NrqlFormatResult.Success ->
+                ToolOutput.Success(ToolBody.Io(text, result.nrql, "NRQL", "NRQL formatado"))
+            is NrqlFormatResult.Failure -> ToolOutput.Failure(result.message)
         }
     }
 }

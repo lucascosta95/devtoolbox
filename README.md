@@ -4,7 +4,7 @@
 
 # DevToolbox
 
-**21 ferramentas de desenvolvimento em um app desktop. Offline, instantâneo, sem telemetria.**
+**23 ferramentas de desenvolvimento em um app desktop. Offline, instantâneo, sem telemetria.**
 
 [![build](https://github.com/lucascosta95/devtoolbox/actions/workflows/build.yml/badge.svg)](https://github.com/lucascosta95/devtoolbox/actions/workflows/build.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)
@@ -30,7 +30,7 @@ para lugar nenhum, e as entradas que você digita nunca são gravadas em disco.
 | Categoria | Ferramentas | |
 |---|---|---|
 | **Encoding** | Base64 · JWT Decoder · URL Encode/Decode · Hash (MD5/SHA-1/SHA-256) · Imagem → Base64 | 5 |
-| **Formatters** | JSON · YAML · cURL · Diff de texto e JSON | 4 |
+| **Formatters** | JSON · YAML · cURL · SQL · NRQL · Diff de texto e JSON | 6 |
 | **Text** | String Case (8 formatos) · Regex Tester · Lorem Ipsum | 3 |
 | **Generators** | UUID v4 · Cores (HEX/RGB/HSL/OKLCH) · Timestamp · Cron · QR Code | 5 |
 | **Validators** | CPF · CNPJ · Telefone brasileiro · Cartão de crédito (Luhn) | 4 |
