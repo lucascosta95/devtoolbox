@@ -11,17 +11,10 @@ import dev.devtoolbox.ui.AppState
 import org.jetbrains.skia.EncodedImageFormat
 import java.io.File
 
-/**
- * Renderiza estados da janela para PNG **sem abrir display** — usado para conferir a UI
- * contra o protótipo (`design/DevToolbox.dc.html`).
- *
- * Uso: `./gradlew :app-desktop:screenshot`
- */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
     val outDir = File(args.getOrElse(0) { "build/screenshots" }).apply { mkdirs() }
 
-    // Uma tela por ferramenta, mais os estados da moldura.
     val shots = ToolRegistry.all.map { it.id to AppState(selectedId = it.id) } + listOf(
         "tema-light" to AppState(theme = ThemeMode.Light),
         "cnpj-light" to AppState(selectedId = "cnpj", theme = ThemeMode.Light),
@@ -61,7 +54,6 @@ fun main(args: Array<String>) {
         val scene = ImageComposeScene(width = 1180, height = 740, density = Density(1f)) {
             App(initialState = state)
         }
-        // Dois frames: o primeiro dispara o carregamento assíncrono de fontes e SVGs.
         scene.render(0)
         val image = scene.render(600_000_000L)
         File(outDir, "$name.png").also { file ->
@@ -72,15 +64,10 @@ fun main(args: Array<String>) {
     }
 }
 
-/**
- * Um PNG de verdade (8×8, cinza) só para a screenshot do arquétipo `image` — o encoder do core
- * é exercitado pelos testes, aqui basta ter bytes válidos.
- */
 private fun sampleImage(alpha: Boolean = false): dev.devtoolbox.core.ImageSelection {
     val image = java.awt.image.BufferedImage(320, 200, java.awt.image.BufferedImage.TYPE_INT_ARGB)
     val g = image.createGraphics()
     if (alpha) {
-        // Círculo opaco sobre fundo transparente: é o que prova o xadrez atrás do preview.
         g.color = java.awt.Color(0xD9, 0xA5, 0x44)
         g.fillOval(60, 20, 160, 160)
     } else {

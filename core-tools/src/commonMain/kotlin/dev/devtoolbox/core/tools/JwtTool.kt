@@ -9,12 +9,6 @@ import dev.devtoolbox.core.util.Base64
 import dev.devtoolbox.core.util.Json
 import dev.devtoolbox.core.util.JsonParseException
 
-/**
- * Decodifica header e payload de um JWT.
- *
- * **Não verifica a assinatura** (v1) — validar HS/RS exigiria HMAC e chaves, fora do escopo.
- * A assinatura é exibida apenas como a terceira parte do token.
- */
 object JwtTool : Tool {
     override val id = "jwt"
     override val name = "JWT Decoder"

@@ -11,13 +11,6 @@ import dev.devtoolbox.core.ToolOutput
 import dev.devtoolbox.core.util.EncodedImage
 import dev.devtoolbox.core.util.ImageEncoder
 
-/**
- * Imagem → data URI Base64.
- *
- * A ferramenta em si é barata: quem lê o arquivo e codifica é a camada de UI, fora da thread
- * principal (ver `ImagePicker`), e entrega o resultado pronto em [ImageSelection.Loaded].
- * `run` só monta as linhas — mantendo a promessa de que todo [Tool.run] é puro e instantâneo.
- */
 object ImageBase64Tool : Tool {
     override val id = "img64"
     override val name = "Imagem → Base64"
@@ -35,8 +28,6 @@ object ImageBase64Tool : Tool {
             is ImageSelection.Empty -> ToolOutput.Success(ToolBody.Image())
             is ImageSelection.Loading ->
                 ToolOutput.Success(ToolBody.Image(loading = true))
-            // O corpo vazio mantém a área de arrastar na tela: o erro não pode tirar do
-            // usuário o caminho para tentar outro arquivo.
             is ImageSelection.Failed ->
                 ToolOutput.Failure(selection.message, ToolBody.Image())
             is ImageSelection.Loaded -> ToolOutput.Success(

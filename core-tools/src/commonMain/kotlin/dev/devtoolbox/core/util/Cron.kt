@@ -8,13 +8,6 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
-/**
- * Parser de expressões cron de **5 campos** (minuto, hora, dia do mês, mês, dia da semana).
- *
- * Suporta `*`, número, intervalo `a-b`, passo (`asterisco/n` e `a-b/n`) e listas por vírgula.
- * **Não** suporta segundos, `L`, `W`, `#` nem atalhos `@daily` — nesses casos o erro nomeia
- * o que não foi entendido.
- */
 class CronParseException(message: String) : Exception(message)
 
 data class CronField(val name: String, val expression: String, val values: Set<Int>)
@@ -109,7 +102,6 @@ object Cron {
         return CronField(name, expression, values)
     }
 
-    /** Descrição em linguagem natural, em pt-BR. */
     fun describe(cron: CronExpression): String {
         val time = describeTime(cron)
         val days = describeDays(cron)
@@ -156,11 +148,6 @@ object Cron {
         }
     }
 
-    /**
-     * Próxima execução a partir de [from], por varredura de minutos.
-     *
-     * O limite de um ano evita laço infinito em expressões impossíveis (ex.: 30 de fevereiro).
-     */
     @OptIn(ExperimentalTime::class)
     fun nextRun(cron: CronExpression, from: LocalDateTime, zone: TimeZone): LocalDateTime? {
         var instant = from.toInstant(zone)
@@ -182,7 +169,6 @@ object Cron {
 
         val domRestricted = cron.dayOfMonth.values.size != 31
         val dowRestricted = cron.dayOfWeek.values.size != 7
-        // Regra do cron: com os dois campos restritos, basta um deles casar.
         val domMatch = time.dayOfMonth in cron.dayOfMonth.values
         val dowMatch = time.dayOfWeek.isoNumber % 7 in cron.dayOfWeek.values
 
@@ -210,5 +196,4 @@ object Cron {
     private fun LocalDateTime.withoutSeconds() = LocalDateTime(year, monthNumber, dayOfMonth, hour, minute)
 }
 
-/** ISO 8601: segunda = 1 … domingo = 7. Não vem pronto no kotlinx-datetime 0.8. */
 internal val kotlinx.datetime.DayOfWeek.isoNumber: Int get() = ordinal + 1

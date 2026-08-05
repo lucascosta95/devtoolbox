@@ -26,13 +26,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
-/** Intervalo de espera antes de reprocessar a entrada, como pede o handoff. */
 const val INPUT_DEBOUNCE_MS = 150L
 
-/** Espera antes de gravar o estado em disco — evita I/O a cada tecla. */
 const val PERSIST_DEBOUNCE_MS = 500L
 
-/** Máximo de ferramentas na seção Recentes. */
 const val MAX_RECENT = 5
 
 data class AppState(
@@ -46,15 +43,12 @@ data class AppState(
 ) {
     val selectedTool: Tool get() = ToolRegistry.byId(selectedId) ?: ToolRegistry.default
 
-    /** Entrada corrente da ferramenta ativa — cai no `defaultInput` enquanto não foi editada. */
     val currentInput: ToolInput get() = inputs[selectedId] ?: selectedTool.defaultInput
 
     val isSearching: Boolean get() = query.isNotBlank()
 
-    /** Categorias filtradas pela busca, sem as vazias. */
     val categories: List<Pair<Category, List<Tool>>> get() = ToolRegistry.categorized(query)
 
-    /** Favoritos e recentes só aparecem com a busca vazia — regra do protótipo. */
     val favoriteTools: List<Tool>
         get() = if (isSearching) emptyList() else ToolRegistry.all.filter { it.id in favorites }
 
@@ -63,15 +57,9 @@ data class AppState(
 
     val hasResults: Boolean get() = categories.isNotEmpty()
 
-    /** Ordem que as setas percorrem: o resultado da busca, na ordem das categorias. */
     val navigableTools: List<Tool> get() = categories.flatMap { it.second }
 }
 
-/**
- * State holder único da aplicação.
- *
- * Fica fora de qualquer composable de propósito: a UI só observa [state] e [output].
- */
 class AppViewModel(
     private val scope: CoroutineScope,
     initialState: AppState = AppState(),
@@ -85,7 +73,6 @@ class AppViewModel(
     val output: StateFlow<ToolOutput> = _state
         .map { it.selectedId to it.currentInput }
         .distinctUntilChanged()
-        // Trocar de ferramenta responde na hora; digitar espera o debounce.
         .debounce { (id, _) -> if (id == lastComputedId) INPUT_DEBOUNCE_MS else 0L }
         .mapLatest { (id, input) ->
             lastComputedId = id
@@ -121,7 +108,6 @@ class AppViewModel(
         )
     }
 
-    /** Move a seleção [delta] posições na lista visível — usado pelas setas do teclado. */
     fun move(delta: Int) {
         val tools = _state.value.navigableTools
         if (tools.isEmpty()) return
@@ -149,11 +135,9 @@ class AppViewModel(
         it.copy(inputs = it.inputs + (id to input))
     }
 
-    /** Restaura a entrada de exemplo da ferramenta ativa. */
     fun resetInput(id: String) = _state.update { it.copy(inputs = it.inputs - id) }
 }
 
-/** Recorte do estado que vai para disco. */
 fun AppState.persisted() = PersistedState(
     selectedId = selectedId,
     favorites = favorites.toList().sorted(),
@@ -162,10 +146,6 @@ fun AppState.persisted() = PersistedState(
     accent = accent.id,
 )
 
-/**
- * Aplica o estado salvo sobre o inicial, ignorando ids de ferramentas que não existem mais
- * (o catálogo pode encolher entre versões).
- */
 fun AppState.mergedWith(saved: PersistedState): AppState = copy(
     selectedId = saved.selectedId?.takeIf { ToolRegistry.byId(it) != null } ?: selectedId,
     favorites = saved.favorites.filter { ToolRegistry.byId(it) != null }.toSet(),
@@ -175,6 +155,5 @@ fun AppState.mergedWith(saved: PersistedState): AppState = copy(
         "dark" -> ThemeMode.Dark
         else -> theme
     },
-    // Uma cor removida do catálogo cai no padrão em vez de deixar o app sem accent.
     accent = AccentColor.byId(saved.accent) ?: accent,
 )

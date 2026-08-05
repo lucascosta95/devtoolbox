@@ -1,11 +1,5 @@
 package dev.devtoolbox.core.util
 
-/**
- * Validadores de CPF, CNPJ e telefone brasileiro.
- *
- * Cada um devolve o veredito **e** o detalhamento que a UI mostra em linhas label/valor,
- * incluindo o motivo quando o valor é inválido.
- */
 data class ValidationResult(
     val valid: Boolean,
     val formatted: String,
@@ -69,7 +63,6 @@ object Cpf {
         }
     }
 
-    /** Soma ponderada com pesos decrescentes a partir de [startWeight]; resto < 2 vira 0. */
     private fun checkDigit(digits: String, startWeight: Int): Int {
         val sum = digits.mapIndexed { i, c -> (c - '0') * (startWeight - i) }.sum()
         val remainder = sum % 11
@@ -154,8 +147,6 @@ object Cnpj {
 }
 
 object BrazilianPhone {
-
-    /** DDDs válidos e a praça correspondente (Anatel). */
     private val AREA_CODES: Map<Int, String> = mapOf(
         11 to "São Paulo", 12 to "São José dos Campos", 13 to "Santos", 14 to "Bauru",
         15 to "Sorocaba", 16 to "Ribeirão Preto", 17 to "São José do Rio Preto", 18 to "Presidente Prudente",
@@ -178,7 +169,6 @@ object BrazilianPhone {
 
     fun validate(input: String): ValidationResult {
         var digits = input.filter { it.isDigit() }
-        // Aceita +55 na frente, desde que sobre um número plausível.
         if (digits.startsWith("55") && digits.length > 11) digits = digits.drop(2)
 
         if (digits.length < 10) {

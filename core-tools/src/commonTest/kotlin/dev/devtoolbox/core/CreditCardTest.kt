@@ -21,7 +21,6 @@ class CreditCardTest {
 
     @Test
     fun rejectsNumbersWithAWrongCheckDigit() {
-        // Mesmo número válido com o último dígito trocado.
         assertFalse(CreditCard.isValid("4539578900805001"))
         assertFalse(CreditCard.isValid("5555555555554445"))
         assertFalse(CreditCard.isValid("378282246310006"))
@@ -77,10 +76,8 @@ class CreditCardTest {
 
     @Test
     fun elpWinsOverVisaAndMastercardOnItsOwnBins() {
-        // 401178 é Elo apesar de começar com 4, e 506699 é Elo apesar de começar com 5.
         assertEquals("Elo", CreditCard.brandOf("4011781234567890")?.name)
         assertEquals("Elo", CreditCard.brandOf("5066991234567890")?.name)
-        // Fora das faixas da Elo, as bandeiras genéricas continuam valendo.
         assertEquals("Visa", CreditCard.brandOf("4011771234567890")?.name)
     }
 

@@ -22,12 +22,6 @@ import dev.devtoolbox.ds.components.CardKicker
 import dev.devtoolbox.ds.components.CopyButton
 import dev.devtoolbox.ds.components.Text
 
-/**
- * Arquétipo `jwt`: o token colorido por parte, e header/payload decodificados em dois cards.
- *
- * As cores das partes vêm do handoff: header em accent-300, payload em neutral-300 e a
- * assinatura no texto a 45%.
- */
 @Composable
 fun JwtLayout(body: ToolBody.Jwt, toolId: String, modifier: Modifier = Modifier) {
     val colors = Nocturne.colors

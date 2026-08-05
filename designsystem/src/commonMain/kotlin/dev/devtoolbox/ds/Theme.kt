@@ -29,10 +29,6 @@ enum class ThemeMode { Dark, Light;
     fun toggled() = if (this == Dark) Light else Dark
 }
 
-/**
- * Escala tipográfica da tela, em sp, exatamente como no handoff.
- * Peso de título é 500 — nunca mais forte.
- */
 @Immutable
 data class NocturneTypography(
     val toolTitle: TextStyle,
@@ -60,12 +56,6 @@ object Nocturne {
     val radii: Radii @Composable get() = LocalRadii.current
 }
 
-/**
- * Família única da aplicação: JetBrains Mono nos pesos 400/500/600, mais o itálico 400.
- *
- * Não há mais separação entre fonte de interface e fonte de código — títulos, labels e blocos
- * de código usam a mesma família, como no protótipo atualizado.
- */
 @Composable
 private fun jetBrainsMono() = FontFamily(
     Font(Res.font.jetbrains_mono_regular, FontWeight.Normal),
@@ -89,24 +79,18 @@ private fun typography(): NocturneTypography {
         sectionHeader = base.copy(
             fontSize = 10.5.sp,
             fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.63.sp, // 0.06em
+            letterSpacing = 0.63.sp,
             lineHeight = 14.sp,
         ),
         kicker = base.copy(
             fontSize = 10.sp,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 1.sp, // 0.1em
+            letterSpacing = 1.sp,
             lineHeight = 14.sp,
         ),
     )
 }
 
-/**
- * Tema próprio do DevToolbox — sem Material.
- *
- * Material traria uma paleta e componentes que teríamos de sobrescrever inteiros; o Nocturne
- * é pequeno o bastante para viver em `foundation` + estes CompositionLocals.
- */
 @Composable
 fun NocturneTheme(
     mode: ThemeMode,
@@ -119,12 +103,10 @@ fun NocturneTheme(
         LocalTypography provides typography(),
         LocalSpacing provides Spacing(),
         LocalRadii provides Radii(),
-        // O DS não usa ripple: hover e pressed são tintas do ramp.
         LocalIndication provides NoIndication,
     ) {
         Box(Modifier.fillMaxSize().background(colors.bg)) { content() }
     }
 }
 
-/** Sublinhado/strikethrough usados pelo diff — exposto para não repetir import. */
 val LineThrough: TextDecoration get() = TextDecoration.LineThrough

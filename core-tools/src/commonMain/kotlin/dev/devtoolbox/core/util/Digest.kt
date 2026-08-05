@@ -1,14 +1,5 @@
 package dev.devtoolbox.core.util
 
-/**
- * MD5, SHA-1 e SHA-256 em Kotlin puro.
- *
- * Escritos à mão para manter [dev.devtoolbox.core] 100% `commonMain` — `java.security` só
- * existiria no target JVM. Conferidos contra os vetores oficiais em `DigestTest`.
- *
- * MD5 e SHA-1 estão aqui porque a ferramenta os expõe para inspeção de valores legados;
- * nenhum dos dois deve ser usado para segurança.
- */
 object Digest {
 
     fun md5(text: String): String = md5(text.encodeToByteArray()).toHex()
@@ -17,8 +8,6 @@ object Digest {
 
     fun sha256(text: String): String = sha256(text.encodeToByteArray()).toHex()
 
-    // ---------------------------------------------------------------- MD5
-
     private val MD5_S = intArrayOf(
         7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
         5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
@@ -26,7 +15,6 @@ object Digest {
         6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
     )
 
-    /** K[i] = floor(2^32 × |sin(i + 1)|) — tabela da RFC 1321. */
     private val MD5_K = intArrayOf(
         -0x28955b88, -0x173848aa, 0x242070db, -0x3e423112,
         -0xa83f051, 0x4787c62a, -0x57cfb9ed, -0x2b96aff,
@@ -52,7 +40,6 @@ object Digest {
         var c0 = -0x67452302
         var d0 = 0x10325476
 
-        // MD5 usa comprimento little-endian, ao contrário de SHA.
         for (chunk in pad(bytes, littleEndianLength = true)) {
             val m = IntArray(16) { i -> chunk.leInt(i * 4) }
             var a = a0
@@ -76,8 +63,6 @@ object Digest {
         }
         return byteArrayOf(*a0.leBytes(), *b0.leBytes(), *c0.leBytes(), *d0.leBytes())
     }
-
-    // --------------------------------------------------------------- SHA-1
 
     fun sha1(bytes: ByteArray): ByteArray {
         var h0 = 0x67452301
@@ -107,8 +92,6 @@ object Digest {
         }
         return byteArrayOf(*h0.beBytes(), *h1.beBytes(), *h2.beBytes(), *h3.beBytes(), *h4.beBytes())
     }
-
-    // ------------------------------------------------------------- SHA-256
 
     private val SHA256_K = intArrayOf(
         0x428a2f98, 0x71374491, -0x4a3f0431, -0x164a245b, 0x3956c25b, 0x59f111f1, -0x6dc07d5c, -0x54e3a12b,
@@ -153,9 +136,6 @@ object Digest {
         return ByteArray(32) { i -> (h[i / 4] ushr (24 - 8 * (i % 4))).toByte() }
     }
 
-    // --------------------------------------------------------------- comum
-
-    /** Padding de Merkle–Damgård compartilhado por MD5, SHA-1 e SHA-256. */
     private fun pad(bytes: ByteArray, littleEndianLength: Boolean): List<ByteArray> {
         val bitLength = bytes.size.toLong() * 8
         val paddedSize = ((bytes.size + 8) / 64 + 1) * 64

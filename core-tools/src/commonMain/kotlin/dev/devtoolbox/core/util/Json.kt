@@ -1,17 +1,9 @@
 package dev.devtoolbox.core.util
 
-/**
- * Parser/serializador JSON mínimo, próprio, em `commonMain`.
- *
- * Motivo de não usar kotlinx-serialization aqui: precisamos preservar a **ordem das chaves**,
- * manter os números exatamente como escritos e produzir erros com **posição** ("linha 3, coluna 12").
- * Também é reaproveitado pelo JWT Decoder e pela normalização do diff de JSON.
- */
 sealed interface JsonValue {
     data object Null : JsonValue
     data class Bool(val value: Boolean) : JsonValue
 
-    /** O número é guardado como texto para não perder formato (1.0, 1e5, precisão longa). */
     data class Num(val literal: String) : JsonValue
     data class Str(val value: String) : JsonValue
     data class Arr(val items: List<JsonValue>) : JsonValue
@@ -31,11 +23,9 @@ object Json {
         return value
     }
 
-    /** Reemite com indentação de [indent] espaços, preservando a ordem das chaves. */
     fun pretty(value: JsonValue, indent: Int = 2): String =
         StringBuilder().also { write(it, value, indent, 0) }.toString()
 
-    /** Reemite sem espaços supérfluos. */
     fun compact(value: JsonValue): String =
         StringBuilder().also { write(it, value, 0, 0) }.toString()
 
@@ -137,7 +127,7 @@ object Json {
         }
 
         fun parseObject(): JsonValue {
-            pos++ // '{'
+            pos++
             val entries = mutableListOf<Pair<String, JsonValue>>()
             skipWhitespace()
             if (!atEnd() && text[pos] == '}') { pos++; return JsonValue.Obj(entries) }
@@ -161,7 +151,7 @@ object Json {
         }
 
         fun parseArray(): JsonValue {
-            pos++ // '['
+            pos++
             val items = mutableListOf<JsonValue>()
             skipWhitespace()
             if (!atEnd() && text[pos] == ']') { pos++; return JsonValue.Arr(items) }
@@ -179,7 +169,7 @@ object Json {
         }
 
         fun parseString(): String {
-            pos++ // '"'
+            pos++
             val sb = StringBuilder()
             while (true) {
                 if (atEnd()) fail("string não fechada")

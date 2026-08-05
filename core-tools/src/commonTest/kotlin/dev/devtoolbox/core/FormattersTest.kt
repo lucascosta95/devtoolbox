@@ -156,7 +156,6 @@ class DiffTest {
 
     @Test
     fun normalizesJsonBeforeComparing() {
-        // Mesma estrutura, formatação diferente: nenhuma linha deve mudar.
         val out = DiffTool.run(ToolInput.Pair("""{"a":1,"b":2}""", "{\n  \"a\": 1,\n  \"b\": 2\n}"))
         assertIs<ToolOutput.Success>(out)
         val body = out.body as ToolBody.Diff
@@ -206,7 +205,6 @@ class JwtToolTest {
 
     @Test
     fun rejectsPayloadThatIsNotJson() {
-        // "bm90IGpzb24" = "not json"
         val out = JwtTool.run(ToolInput.Text("eyJhbGciOiJIUzI1NiJ9.bm90IGpzb24.sig"))
         assertIs<ToolOutput.Failure>(out)
         assertTrue(out.message.contains("JSON"))

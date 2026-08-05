@@ -34,10 +34,6 @@ import dev.devtoolbox.ds.DISABLED_ALPHA
 import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.focusRing
 
-/**
- * Botão *outlined* — o DS nunca preenche botões: borda 1 px accent sobre transparente.
- * Hover/pressed vêm do ramp, foco é o anel accent.
- */
 @Composable
 fun OutlinedButton(
     label: String,
@@ -47,7 +43,6 @@ fun OutlinedButton(
     iconFill: Boolean = false,
     enabled: Boolean = true,
     accentBorder: Boolean = true,
-    /** `false` = variante fantasma: sem borda, só hover. */
     bordered: Boolean = true,
     contentColor: Color = Nocturne.colors.text,
     textStyle: TextStyle = Nocturne.type.mono,
@@ -69,8 +64,6 @@ fun OutlinedButton(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        // Centralizado: quando o botão é esticado (`weight`), o conteúdo não fica encostado
-        // na borda esquerda; sem espaço sobrando, não muda nada.
         horizontalArrangement = Arrangement.spacedBy(Nocturne.space.xs, Alignment.CenterHorizontally),
         modifier = modifier
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
@@ -99,15 +92,10 @@ fun OutlinedButton(
             .padding(contentPadding),
     ) {
         if (icon != null) PhosphorIcon(icon, size = iconSize, tint = contentColor, fill = iconFill)
-        // Rótulo vazio = botão só de ícone; um `Text("")` ainda ocuparia a largura do espaçamento.
         if (label.isNotEmpty()) Text(label, style = textStyle, color = contentColor)
     }
 }
 
-/**
- * Variante `.btn-ghost`: sem borda, compacta — as ações que acompanham um conteúdo
- * (trocar/remover a imagem) em vez de comandarem a tela.
- */
 @Composable
 fun GhostButton(
     label: String,
@@ -132,7 +120,6 @@ fun GhostButton(
     contentPadding = PaddingValues(horizontal = Nocturne.space.xs, vertical = 4.dp),
 )
 
-/** Variante `.btn-secondary`: borda neutra, para ações de apoio ("Gerar novo exemplo"). */
 @Composable
 fun SecondaryButton(
     label: String,
@@ -150,7 +137,6 @@ fun SecondaryButton(
     contentColor = Nocturne.colors.text(0.8f),
 )
 
-/** Botão-ícone quadrado, sem borda — title bar, favoritar, fechar. */
 @Composable
 fun IconButton(
     icon: String,

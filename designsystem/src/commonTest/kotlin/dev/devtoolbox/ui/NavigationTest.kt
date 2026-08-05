@@ -41,7 +41,6 @@ class NavigationTest {
 
         val expected = ToolRegistry.search("validators")
         vm.move(1)
-        // A seleção pula para dentro do resultado, ignorando o que a busca escondeu.
         assertEquals(expected.first().id, vm.state.value.selectedId)
 
         vm.move(1)

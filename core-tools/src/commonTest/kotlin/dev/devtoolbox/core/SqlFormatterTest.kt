@@ -9,7 +9,6 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-/** Consulta do protótipo, também usada como entrada padrão da ferramenta. */
 private const val REFERENCE_INPUT =
     "select u.id, u.name, count(o.id) as total from users u " +
         "inner join orders o on o.user_id = u.id " +

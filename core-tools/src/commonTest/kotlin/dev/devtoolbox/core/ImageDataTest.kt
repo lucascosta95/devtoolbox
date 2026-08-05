@@ -16,9 +16,6 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class ImageDataTest {
-
-    // --- Amostras mínimas: só o cabeçalho que cada formato exige, com o resto zerado. ---
-
     private fun png(width: Int, height: Int) = ByteArray(64).also { b ->
         byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A).copyInto(b)
         "IHDR".encodeToByteArray().copyInto(b, 12)
@@ -27,10 +24,8 @@ class ImageDataTest {
     }
 
     private fun jpeg(width: Int, height: Int) = ByteArray(32).also { b ->
-        // SOI + SOF0 com comprimento 17, precisão 8 e as duas dimensões.
         byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte(), 0xC0.toByte(), 0x00, 0x11, 0x08)
             .copyInto(b)
-        // O marcador está no índice 2, então altura e largura caem em 2+5 e 2+7.
         b.putBe16(7, height)
         b.putBe16(9, width)
     }
@@ -64,8 +59,6 @@ class ImageDataTest {
     private fun svg(attributes: String) =
         """<svg xmlns="http://www.w3.org/2000/svg" $attributes><rect/></svg>""".encodeToByteArray()
 
-    // --- Round-trip ---
-
     @Test
     fun encodesAndDecodesBackToTheOriginalBytes() {
         val original = png(512, 512)
@@ -83,11 +76,8 @@ class ImageDataTest {
         assertEquals(image.base64, image.dataUri.substringAfter("base64,"))
     }
 
-    // --- Detecção por magic bytes ---
-
     @Test
     fun detectsFormatsByMagicBytesRegardlessOfTheExtension() {
-        // O nome mente em todos: o que vale é o conteúdo.
         assertEquals(ImageFormat.Png, ImageEncoder.detectFormat("a.txt", png(1, 1)))
         assertEquals(ImageFormat.Jpeg, ImageEncoder.detectFormat("a.png", jpeg(1, 1)))
         assertEquals(ImageFormat.Gif, ImageEncoder.detectFormat("a.bin", gif(1, 1)))
@@ -99,7 +89,6 @@ class ImageDataTest {
     @Test
     fun svgIsDetectedByExtensionBecauseItIsText() {
         assertEquals(ImageFormat.Svg, ImageEncoder.detectFormat("icon.svg", svg("""width="24"""")))
-        // Sem a extensão, um XML qualquer não vira imagem.
         assertNull(ImageEncoder.detectFormat("icon.xml", svg("""width="24"""")))
     }
 
@@ -108,8 +97,6 @@ class ImageDataTest {
         val result = ImageEncoder.encode("relatorio.pdf", "%PDF-1.7\n%…".encodeToByteArray())
         assertContains(assertIs<ImageEncodeResult.Error>(result).message, "Formato não suportado")
     }
-
-    // --- Dimensões ---
 
     @Test
     fun readsDimensionsFromEachHeader() {
@@ -145,21 +132,16 @@ class ImageDataTest {
 
         assertEquals(24 to 24, size("""width="24" height="24"""").let { it.width to it.height })
         assertEquals(24 to 24, size("""width="24px" height="24px"""").let { it.width to it.height })
-        // 100% não diz tamanho em pixels: cai no viewBox.
         val relative = size("""width="100%" height="100%" viewBox="0 0 256 128"""")
         assertEquals(256 to 128, relative.width to relative.height)
-        // Sem nenhum dos dois, a UI mostra "não informadas".
         assertNull(size("").width)
     }
-
-    // --- Tamanho e limite ---
 
     @Test
     fun base64SizeIsTheEncodedLengthAndGrowsAboutAThird() {
         val bytes = ByteArray(3_000) { it.toByte() }
         val image = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("a.png", pngOf(bytes))).image
 
-        // 4 caracteres a cada 3 bytes, arredondando para cima.
         val expected = (image.originalBytes + 2) / 3 * 4
         assertEquals(expected, image.base64Bytes)
         assertEquals(33, ImageEncoder.growthPercent(image.originalBytes, image.base64Bytes))
@@ -193,8 +175,6 @@ class ImageDataTest {
         assertEquals("5,0 MB", ImageEncoder.formatBytes(5 * 1024 * 1024))
     }
 
-    // --- Snippets e ferramenta ---
-
     @Test
     fun snippetsCarryTheWholeDataUri() {
         val image = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("logo.png", png(8, 8))).image
@@ -206,8 +186,6 @@ class ImageDataTest {
 
     @Test
     fun toolExposesRowsDataUriAndSnippets() {
-        // Arquivo grande o bastante para o acréscimo do Base64 assentar nos 33% teóricos:
-        // em arquivos minúsculos o padding pesa e o número sobe.
         val bytes = png(512, 512) + ByteArray(9_000)
         val image = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("logo.png", bytes)).image
         val output = ImageBase64Tool.run(ToolInput.Image(ImageSelection.Loaded(image)))
@@ -247,7 +225,6 @@ class ImageDataTest {
         val original = png(320, 200)
         val image = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("logo.png", original)).image
 
-        // O preview desenha estes bytes; decodificar o Base64 de volta a cada quadro seria caro.
         assertEquals(original.toList(), image.bytes.toList())
         assertEquals(original.size, image.originalBytes)
     }
@@ -258,7 +235,6 @@ class ImageDataTest {
         val first = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("a.png", bytes)).image
         val second = assertIs<ImageEncodeResult.Ok>(ImageEncoder.encode("a.png", bytes)).image
 
-        // Igualdade por identidade: comparar megabytes a cada emissão de estado não paga.
         assertEquals(first, first)
         assertNotEquals(first, second)
     }
@@ -278,8 +254,6 @@ class ImageDataTest {
         val loaded = ImageBase64Tool.run(ToolInput.Image(ImageSelection.Loaded(image)))
         assertNotNull((assertIs<ToolOutput.Success>(loaded).body as ToolBody.Image).details)
 
-        // O botão de remover devolve a seleção para `Empty`: some o preview, o card de
-        // metadados, a data URI e os snippets de uma vez só.
         val cleared = ImageBase64Tool.run(ToolInput.Image(ImageSelection.Empty))
         val body = assertIs<ToolOutput.Success>(cleared).body as ToolBody.Image
 
@@ -303,11 +277,9 @@ class ImageDataTest {
         val tool = ToolRegistry.byId("img64")
         assertEquals(Category.Encoding, tool?.category)
         assertEquals("image", tool?.icon)
-        // Logo depois do Hash Generator, como pede o handoff.
         assertEquals("hash", ToolRegistry.all[ToolRegistry.all.indexOfFirst { it.id == "img64" } - 1].id)
     }
 
-    /** Um PNG válido com [payload] pendurado depois do cabeçalho — serve para pesar bytes. */
     private fun pngOf(payload: ByteArray) = png(1, 1) + payload
 }
 

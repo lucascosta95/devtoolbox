@@ -67,25 +67,15 @@ import dev.devtoolbox.ui.pickImageFile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Largura fixa da área de soltar, do handoff. */
 private val DROP_ZONE_WIDTH = 168.dp
 
-/** Altura mínima de cada estado da coluna, do handoff. */
 private val EMPTY_ZONE_MIN_HEIGHT = 148.dp
 private val PREVIEW_MIN_HEIGHT = 112.dp
 
-/** A coluna de label deste card é mais estreita que a dos outros — o card é curto. */
 private val FILE_LABEL_WIDTH = 108.dp
 
-/** A data URI é longa por natureza: mostra ~120 dp e o resto vai no botão de copiar. */
 private val DATA_URI_MAX_HEIGHT = 120.dp
 
-/**
- * Arquétipo `image`: área de soltar + dados do arquivo, a data URI e os snippets.
- *
- * A leitura e a codificação são disparadas daqui, mas acontecem fora da thread de UI
- * (ver [loadImageSelection]); enquanto rodam, o estado vira [ImageSelection.Loading].
- */
 @Composable
 fun ImageLayout(
     body: ToolBody.Image,
@@ -144,7 +134,6 @@ fun ImageLayout(
                 Modifier
                     .padding(top = Nocturne.space.xs)
                     .heightIn(max = DATA_URI_MAX_HEIGHT)
-                    // Recorta em vez de rolar: quem quer a string inteira usa o botão.
                     .clip(RoundedCornerShape(Nocturne.radii.sm)),
             ) {
                 Text(details.dataUri, style = Nocturne.type.mono, color = Nocturne.colors.text(0.9f))
@@ -181,12 +170,6 @@ fun ImageLayout(
     }
 }
 
-/**
- * A coluna de 168 px: área de arraste quando não há imagem, preview com ações quando há.
- *
- * Os dois estados são o mesmo alvo de arrastar-e-soltar — trocar a imagem arrastando outra por
- * cima continua funcionando depois de carregada.
- */
 @Composable
 private fun ImageColumn(
     source: EncodedImage?,
@@ -269,19 +252,12 @@ private fun EmptyDropZone(dragging: Boolean, onPick: () -> Unit) {
     }
 }
 
-/**
- * Preview em `contain` sobre o xadrez de transparência.
- *
- * Nunca recorta: o preview existe para o usuário reconhecer o arquivo que escolheu, e um
- * `crop` poderia esconder justamente o que distingue duas imagens parecidas.
- */
 @Composable
 private fun ImagePreview(source: EncodedImage, dragging: Boolean, modifier: Modifier = Modifier) {
     val colors = Nocturne.colors
     val density = LocalDensity.current
     val radius = Nocturne.radii.md
 
-    // Decodificar acontece fora da thread de UI — um PNG grande leva dezenas de ms.
     val painter by produceState<Painter?>(initialValue = null, source) {
         value = withContext(ioDispatcher) { decodeImage(source, density) }
     }
@@ -308,7 +284,6 @@ private fun ImagePreview(source: EncodedImage, dragging: Boolean, modifier: Modi
                 modifier = Modifier.fillMaxSize().padding(Nocturne.space.xs),
             )
         } else {
-            // Formato que a plataforma não desenha (ou decodificação ainda em curso).
             PhosphorIcon("image-square", size = 24.dp, tint = colors.text(0.35f))
         }
     }
@@ -324,14 +299,12 @@ private fun Placeholder(text: String) {
     }
 }
 
-/** Borda tracejada de 1 px — o Compose não tem uma, então é um `drawBehind` com dash. */
 private fun Modifier.dashedBorder(color: Color, radius: androidx.compose.ui.unit.Dp) = drawBehind {
     val stroke = Stroke(
         width = 1.dp.toPx(),
         pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx())),
     )
     val corner = CornerRadius(radius.toPx(), radius.toPx())
-    // Meio traço para dentro: senão a linha sai pela metade fora dos limites.
     val inset = stroke.width / 2f
     drawRoundRect(
         color = color,
@@ -342,10 +315,6 @@ private fun Modifier.dashedBorder(color: Color, radius: androidx.compose.ui.unit
     )
 }
 
-/**
- * Xadrez de transparência: células de 7 dp em tabuleiro (ladrilho de 14 dp), como o par de
- * gradientes do protótipo. Sem ele, um PNG com alpha sumiria contra o fundo do card.
- */
 private fun Modifier.checkerboard(base: Color, tint: Color) = drawBehind {
     drawRect(base)
     val cell = 7.dp.toPx()

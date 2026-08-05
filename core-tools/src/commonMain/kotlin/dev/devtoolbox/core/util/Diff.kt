@@ -3,11 +3,6 @@ package dev.devtoolbox.core.util
 import dev.devtoolbox.core.DiffKind
 import dev.devtoolbox.core.DiffLine
 
-/**
- * Diff por linha via LCS (programação dinâmica).
- *
- * Saída no formato do protótipo: remoções antes das adições, linhas iguais sem marca.
- */
 object Diff {
 
     fun lines(left: String, right: String): List<DiffLine> {
@@ -44,7 +39,6 @@ object Diff {
         return table
     }
 
-    /** Agrupa cada bloco de mudanças com as remoções primeiro — leitura mais próxima do `diff`. */
     private fun reorderDeletionsFirst(lines: List<DiffLine>): List<DiffLine> {
         val out = mutableListOf<DiffLine>()
         var i = 0
@@ -63,7 +57,6 @@ object Diff {
         return out
     }
 
-    /** Normaliza os dois lados quando ambos são JSON válido, para diferenciar estrutura e não formatação. */
     fun normalizeJsonIfPossible(left: String, right: String): Pair<String, String> = try {
         Json.format(left) to Json.format(right)
     } catch (_: JsonParseException) {

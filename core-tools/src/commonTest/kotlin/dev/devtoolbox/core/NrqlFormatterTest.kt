@@ -9,7 +9,6 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-/** Consulta do protótipo, também usada como entrada padrão da ferramenta. */
 private const val REFERENCE_INPUT =
     "select count(*), average(duration) from Transaction " +
         "where appName = 'checkout-api' and httpResponseCode != '200' " +

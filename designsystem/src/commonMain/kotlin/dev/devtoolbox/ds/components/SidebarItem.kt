@@ -28,11 +28,6 @@ import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.focusRing
 
-/**
- * Item de ferramenta da sidebar: ícone 15 + label 13 (elipse no overflow) + estrela 13.
- *
- * A estrela não seleciona o item — equivale ao `stopPropagation` do protótipo.
- */
 @Composable
 fun SidebarItem(
     label: String,
@@ -79,7 +74,6 @@ fun SidebarItem(
             color = foreground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            // Encolhe para caber sem empurrar a estrela para fora do item.
             modifier = Modifier.weight(1f),
         )
         IconButton(

@@ -30,10 +30,6 @@ import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.focusRing
 
-/**
- * Campo `.input` do DS: altura 36, raio 8, fundo surface, borda divider,
- * com ícone opcional à esquerda (14 px, left 11) e placeholder.
- */
 @Composable
 fun TextField(
     value: String,
@@ -46,7 +42,6 @@ fun TextField(
     textStyle: TextStyle = Nocturne.type.body,
     focusRequester: FocusRequester? = null,
     onFocusChange: (Boolean) -> Unit = {},
-    /** `false` = campo nu, para uso dentro de um card (sem "card dentro de card"). */
     framed: Boolean = true,
 ) {
     val colors = Nocturne.colors
@@ -59,7 +54,6 @@ fun TextField(
 
     CompositionLocalProvider(LocalTextSelectionColors provides selectionColors) {
         Box(
-            // Campo de uma linha centraliza; multilinha começa no topo, como um editor.
             contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart,
             modifier = modifier
                 .fillMaxWidth()
@@ -119,7 +113,6 @@ fun TextField(
     }
 }
 
-/** Variante multilinha para a entrada das ferramentas (mono, altura livre). */
 @Composable
 fun CodeTextField(
     value: String,

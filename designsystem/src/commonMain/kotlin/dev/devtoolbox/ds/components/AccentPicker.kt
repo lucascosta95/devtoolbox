@@ -23,16 +23,9 @@ import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.Nocturne
 
-/** Tamanho do swatch e do respiro entre eles, do handoff: 13 px com gap de 7 px. */
 private val SWATCH_SIZE = 13.dp
 private val SWATCH_GAP = 7.dp
 
-/**
- * Seletor de cor de destaque da barra de título: o ícone `drop-half` e seis swatches redondos.
- *
- * O selecionado ganha o anel duplo do protótipo — 2 px na cor da surface, depois 1,5 px na
- * própria cor —, que funciona como marca de seleção mesmo entre duas cores parecidas.
- */
 @Composable
 fun AccentPicker(
     selected: AccentColor,
@@ -54,7 +47,6 @@ fun AccentPicker(
 @Composable
 private fun Swatch(accent: AccentColor, selected: Boolean, onSelect: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
-    // O anel cresce para fora, então o swatch reserva 3.5 dp de folga de cada lado.
     val ringInset = 3.5.dp
 
     Box(

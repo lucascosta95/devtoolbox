@@ -70,7 +70,6 @@ class Base64ToolTest {
 
     @Test
     fun explicitDirectionOverridesTheHeuristic() {
-        // "Zm9v" é Base64 válido, mas no modo Encode deve ser codificado como texto.
         val out = Base64Tool.run(ToolInput.Text("Zm9v", Direction.Encode))
         assertIs<ToolOutput.Success>(out)
         assertEquals("Wm05dg==", (out.body as ToolBody.Io).output)

@@ -29,10 +29,8 @@ import dev.devtoolbox.ds.components.SidebarItem
 import dev.devtoolbox.ds.components.Text
 import dev.devtoolbox.ds.components.TextField
 
-/** Largura fixa da sidebar (280 px no protótipo). */
 private val SIDEBAR_WIDTH = 280.dp
 
-/** Altura reservada ao rodapé: 11.2 + 16.8 de padding mais uma linha de 11 sp. */
 private val FOOTER_HEIGHT = 44.dp
 
 @Composable
@@ -59,9 +57,6 @@ fun Sidebar(
             }
 
             BoxWithConstraints(Modifier.fillMaxWidth()) {
-                // O rodapé rola junto com a lista — não é sticky. O mínimo aqui é o que sobra
-                // do viewport: com poucos resultados de busca ele encosta no fim da sidebar,
-                // em vez de ficar solto logo abaixo do último item.
                 val listMinHeight = (maxHeight - FOOTER_HEIGHT).coerceAtLeast(0.dp)
 
                 Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
@@ -106,7 +101,6 @@ fun Sidebar(
             }
         }
 
-        // Borda direita de 1 px, como no protótipo.
         Box(
             Modifier.fillMaxHeight().width(1.dp)
                 .background(Nocturne.colors.divider)
@@ -134,12 +128,6 @@ private fun ToolList(
     }
 }
 
-/**
- * Rodapé da sidebar: a marca à esquerda e a versão à direita.
- *
- * A versão vem do [BuildInfo] gerado pelo Gradle a partir de `gradle.properties` — nunca de
- * uma constante escrita na UI, que sairia de sincronia com o instalador no primeiro release.
- */
 @Composable
 private fun SidebarFooter() {
     val colors = Nocturne.colors

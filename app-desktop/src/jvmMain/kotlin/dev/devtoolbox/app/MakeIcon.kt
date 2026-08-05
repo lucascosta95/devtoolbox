@@ -19,19 +19,6 @@ import org.jetbrains.skia.EncodedImageFormat
 import java.io.ByteArrayOutputStream
 import java.io.File
 
-/**
- * Gera os ícones da aplicação a partir do próprio design system — a chave inglesa do Phosphor
- * sobre o fundo accent, com os mesmos tokens da UI.
- *
- * Emite os três formatos que o `jpackage` espera, um por plataforma:
- * `devtoolbox.png` (Linux), `devtoolbox.ico` (Windows) e `devtoolbox.icns` (macOS).
- *
- * `.ico` e `.icns` são escritos à mão porque são apenas contêineres de PNG — assim o build
- * não depende de ImageMagick, `iconutil` ou qualquer ferramenta externa, e roda igual nos
- * três runners do CI.
- *
- * Uso: `./gradlew :app-desktop:appIcon`.
- */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
     val outDir = File(args.getOrElse(0) { "src/jvmMain/resources/icons" }).apply { mkdirs() }
@@ -39,11 +26,9 @@ fun main(args: Array<String>) {
     val png512 = renderPng(512)
     File(outDir, "devtoolbox.png").writeBytes(png512)
 
-    // Windows: tamanhos que o Explorer usa em lista, detalhes e ladrilhos.
     val icoSizes = listOf(16, 32, 48, 64, 128, 256)
     File(outDir, "devtoolbox.ico").writeBytes(buildIco(icoSizes.map { it to renderPng(it) }))
 
-    // macOS: os tipos que o Finder e o Dock consultam, incluindo as variantes @2x.
     val icnsEntries = listOf(
         "ic11" to 32, "ic12" to 64, "ic07" to 128,
         "ic13" to 256, "ic08" to 256, "ic14" to 512, "ic09" to 512,
@@ -53,7 +38,6 @@ fun main(args: Array<String>) {
     println("ícones escritos em ${outDir.absolutePath}: devtoolbox.png, .ico, .icns")
 }
 
-/** Desenha o ícone no tamanho pedido e devolve os bytes do PNG. */
 @OptIn(ExperimentalComposeUiApi::class)
 private fun renderPng(size: Int): ByteArray {
     val scene = ImageComposeScene(width = size, height = size, density = Density(1f)) {
@@ -61,7 +45,6 @@ private fun renderPng(size: Int): ByteArray {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    // Proporções fixas em relação ao lado: o ícone fica igual em qualquer tamanho.
                     .clip(RoundedCornerShape((size * 0.1875f).dp))
                     .background(Ramp.accent900),
                 contentAlignment = Alignment.Center,
@@ -78,10 +61,6 @@ private fun renderPng(size: Int): ByteArray {
     return bytes
 }
 
-/**
- * Formato ICO: um cabeçalho, um diretório de entradas e os PNGs em sequência.
- * Entradas com PNG embutido são suportadas do Windows Vista em diante.
- */
 private fun buildIco(images: List<Pair<Int, ByteArray>>): ByteArray {
     val out = ByteArrayOutputStream()
 
@@ -91,19 +70,18 @@ private fun buildIco(images: List<Pair<Int, ByteArray>>): ByteArray {
         out.write((v shr 16) and 0xFF); out.write((v shr 24) and 0xFF)
     }
 
-    le16(0)                 // reservado
-    le16(1)                 // tipo 1 = ícone
+    le16(0)
+    le16(1)
     le16(images.size)
 
     var offset = 6 + images.size * 16
     for ((size, png) in images) {
-        // 0 representa 256 no campo de um byte.
         out.write(if (size >= 256) 0 else size)
         out.write(if (size >= 256) 0 else size)
-        out.write(0)        // paleta
-        out.write(0)        // reservado
-        le16(1)             // planos
-        le16(32)            // bits por pixel
+        out.write(0)
+        out.write(0)
+        le16(1)
+        le16(32)
         le32(png.size)
         le32(offset)
         offset += png.size
@@ -112,10 +90,6 @@ private fun buildIco(images: List<Pair<Int, ByteArray>>): ByteArray {
     return out.toByteArray()
 }
 
-/**
- * Formato ICNS: magic `icns`, tamanho total, e uma sequência de blocos
- * `[tipo(4)][tamanho(4)][dados]` — com PNG cru nos tipos `ic07`+.
- */
 private fun buildIcns(entries: List<Pair<String, ByteArray>>): ByteArray {
     val body = ByteArrayOutputStream()
 
@@ -126,7 +100,7 @@ private fun buildIcns(entries: List<Pair<String, ByteArray>>): ByteArray {
 
     for ((type, png) in entries) {
         body.write(type.encodeToByteArray())
-        be32(body, png.size + 8) // o tamanho do bloco inclui o próprio cabeçalho
+        be32(body, png.size + 8)
         body.write(png)
     }
 

@@ -1,26 +1,13 @@
 package dev.devtoolbox.core.util
 
-/**
- * Léxico compartilhado por [formatSql] e [formatNrql].
- *
- * Só a **quebra em tokens** é comum às duas linguagens — as regras de indentação vivem em cada
- * formatador, porque NRQL não tem JOIN nem subconsulta correlacionada e o SQL não tem janela de
- * tempo. O lexer não valida nada: string sem fechar ou operador desconhecido viram tokens
- * mesmo assim, que é o que sustenta o "sem validação de sintaxe" das duas ferramentas.
- */
 internal enum class TokenKind { Word, Number, Text, LineComment, BlockComment, Punct }
 
 internal data class QueryToken(
     val text: String,
     val kind: TokenKind,
-    /**
-     * `true` quando o token encosta no anterior no texto original. É o que distingue
-     * `count(x)` de `values (1, 2)` sem precisar de um catálogo de funções.
-     */
     val glued: Boolean,
 )
 
-/** Operadores de dois caracteres, testados antes dos de um. */
 private val TWO_CHAR_OPERATORS = setOf("!=", "<>", ">=", "<=", "||", "::", "->")
 
 internal fun tokenizeQuery(source: String): List<QueryToken> {
@@ -64,7 +51,6 @@ internal fun tokenizeQuery(source: String): List<QueryToken> {
                         d == '\\' && j + 1 < source.length -> {
                             sb.append(d).append(source[j + 1]); j += 2
                         }
-                        // Aspa duplicada é escape, não fim da string: 'it''s'.
                         d == c && j + 1 < source.length && source[j + 1] == c -> {
                             sb.append(c).append(c); j += 2
                         }
@@ -119,14 +105,9 @@ internal fun tokenizeQuery(source: String): List<QueryToken> {
 
 private fun isWordStart(c: Char) = c.isLetter() || c == '_' || c == '@' || c == '#' || c == '$'
 
-/** O ponto entra na palavra: `u.id` é um token só, e por isso nunca vira palavra-chave. */
 private fun isWordPart(c: Char) = c.isLetterOrDigit() || c == '_' || c == '@' || c == '#' ||
     c == '$' || c == '.'
 
-/**
- * Escreve o resultado linha a linha, guardando a indentação corrente em *níveis* — a conversão
- * para espaços só acontece no flush, então mudar `indentSize` não exige mexer no formatador.
- */
 internal class LineWriter(private val indentSize: Int) {
     private val lines = mutableListOf<String>()
     private val current = StringBuilder()
@@ -136,7 +117,6 @@ internal class LineWriter(private val indentSize: Int) {
 
     val lineIsEmpty: Boolean get() = current.isEmpty()
 
-    /** Fecha a linha atual e abre a próxima em [units] níveis de indentação. */
     fun startLine(units: Int) {
         flush()
         indent = units
@@ -154,7 +134,6 @@ internal class LineWriter(private val indentSize: Int) {
         }
     }
 
-    /** Linha em branco separadora — nunca duas seguidas, nunca no começo. */
     fun blankLine() {
         flush()
         if (lines.isNotEmpty() && lines.last().isNotEmpty()) lines += ""
@@ -166,13 +145,8 @@ internal class LineWriter(private val indentSize: Int) {
     }
 }
 
-/** Como uma palavra se comporta diante de um `(` que a segue. */
 internal enum class WordRole { Function, Keyword, Identifier }
 
-/**
- * Espaçamento entre dois tokens vizinhos na mesma linha. Vale para SQL e NRQL: pontuação de
- * fechamento cola no que veio antes, o resto é separado por um espaço.
- */
 internal fun spaceBetween(
     prev: QueryToken?,
     cur: QueryToken,
@@ -182,7 +156,6 @@ internal fun spaceBetween(
     if (lineIsEmpty || prev == null) return false
     if (cur.text == "," || cur.text == ";" || cur.text == ")") return false
     if (prev.text == "(") return false
-    // `u.` + `*` = `u.*`; o lexer corta a palavra no ponto quando o que segue não é letra.
     if (prev.text.endsWith(".")) return false
     if (prev.text == "::" || cur.text == "::") return false
     if (cur.text == "(") return spaceBeforeOpenParen(prev, cur, roleOf)
@@ -195,11 +168,9 @@ private fun spaceBeforeOpenParen(
     roleOf: (QueryToken) -> WordRole,
 ): Boolean = when {
     prev.kind != TokenKind.Word -> true
-    // `count (x)` vira `count(x)`; `IN (…)` e `VALUES (…)` sempre respiram.
     else -> when (roleOf(prev)) {
         WordRole.Function -> false
         WordRole.Keyword -> true
-        // Num identificador — nome de tabela, alias — o texto original decide.
         WordRole.Identifier -> !cur.glued
     }
 }

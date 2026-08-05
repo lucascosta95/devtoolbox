@@ -3,17 +3,7 @@ package dev.devtoolbox.ds
 import androidx.compose.ui.graphics.Color
 import kotlin.math.pow
 
-/**
- * Mistura perceptual de cores em OKLab — o equivalente do `color-mix(in oklab, …)` do protótipo.
- *
- * Interpolar em sRGB escurece e dessatura a passagem entre matizes (o clássico "roxo lamacento"
- * entre azul e amarelo); OKLab é uniforme o bastante para que 45% de uma cor pareça mesmo
- * 45% dela. Como os tokens de accent são derivados por mistura em runtime, a diferença é
- * visível em todas as seis paletas.
- */
 object Oklab {
-
-    /** [ratio] é o peso da **primeira** cor, como em `color-mix(in oklab, a 45%, b)`. */
     fun mix(a: Color, b: Color, ratio: Float): Color {
         val t = ratio.coerceIn(0f, 1f)
         val (l1, a1, b1) = toOklab(a)
@@ -53,13 +43,11 @@ object Oklab {
         )
     }
 
-    /** Transferência sRGB → linear (a mesma curva da especificação CSS). */
     private fun toLinear(channel: Float): Float =
         if (channel <= 0.04045f) channel / 12.92f else ((channel + 0.055f) / 1.055f).pow(2.4f)
 
     private fun fromLinear(channel: Float): Float {
         val v = if (channel <= 0.0031308f) channel * 12.92f else 1.055f * channel.pow(1f / 2.4f) - 0.055f
-        // Fora de gamut acontece com matizes saturados; recortar é o que o navegador faz.
         return v.coerceIn(0f, 1f)
     }
 

@@ -4,7 +4,6 @@ import dev.devtoolbox.core.util.Digest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Vetores oficiais: RFC 1321 (MD5), FIPS 180-1 (SHA-1), FIPS 180-2 (SHA-256). */
 class DigestTest {
 
     @Test
@@ -48,7 +47,6 @@ class DigestTest {
 
     @Test
     fun handlesMessagesThatCrossBlockBoundaries() {
-        // 55, 56 e 64 bytes exercitam os três casos do padding.
         val a55 = "a".repeat(55)
         val a56 = "a".repeat(56)
         val a64 = "a".repeat(64)
@@ -67,7 +65,6 @@ class DigestTest {
 
     @Test
     fun handlesUtf8Multibyte() {
-        // O hash é sobre os bytes UTF-8, não sobre os chars.
         assertEquals(Digest.sha256("ação"), Digest.sha256("ação"))
         assertEquals(64, Digest.sha256("日本語 🎉").length)
     }

@@ -12,7 +12,6 @@ import dev.devtoolbox.core.util.Cpf
 import dev.devtoolbox.core.util.CreditCard
 import dev.devtoolbox.core.util.ValidationResult
 
-/** Base comum dos três validadores: só muda a função de validação e a copy. */
 private abstract class ValidatorTool(
     override val id: String,
     override val name: String,

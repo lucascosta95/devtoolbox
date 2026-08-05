@@ -10,14 +10,6 @@ import dev.devtoolbox.core.util.QrCode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * Confere o encoder próprio contra a **ZXing** — a verificação independente que faltava.
- *
- * A ZXing entra só no classpath de teste (`jvmTest`); o `:core-tools` de produção segue sem
- * dependências e livre de código de plataforma. O decodificador da ZXing lê a matriz crua:
- * exercita informação de formato, máscara, Reed–Solomon e payload — o caminho inteiro que
- * um leitor de celular percorre depois de achar o código na imagem.
- */
 class QrAgainstZxingTest {
 
     private val samples = listOf(
@@ -39,17 +31,10 @@ class QrAgainstZxingTest {
 
     @Test
     fun zxingAlsoDecodesTheSameContentItEncodes() {
-        // Sanidade do próprio teste: se a ZXing não lesse o que ela mesma gera, a comparação
-        // acima não provaria nada.
         for (text in samples) {
             assertEquals(text, Decoder().decode(toBitMatrix(encodeWithZxing(text))).text)
         }
     }
-
-    // Não comparamos módulo a módulo com a ZXing: a máscara escolhida pode diferir
-    // legitimamente entre implementações (a norma manda escolher a de menor penalidade, mas
-    // empates e detalhes das regras variam). O que importa é o código ser decodificável, que
-    // é o que `zxingDecodesOurMatrix` verifica.
 
     private fun toBitMatrix(modules: List<List<Boolean>>): BitMatrix {
         val matrix = BitMatrix(modules.size, modules.size)

@@ -89,7 +89,6 @@ object TimestampTool : Tool {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     )
 
-    /** Injetável para os testes; em produção lê o relógio do sistema. */
     var now: () -> Instant = { Clock.System.now() }
     var zone: () -> TimeZone = { TimeZone.currentSystemDefault() }
 
@@ -122,7 +121,6 @@ object TimestampTool : Tool {
 
     private fun parseInstant(text: String): Instant? {
         text.toLongOrNull()?.let { number ->
-            // Heurística: 13 dígitos ou mais é milissegundo.
             return if (abs(number) >= 100_000_000_000L) {
                 Instant.fromEpochMilliseconds(number)
             } else {
@@ -172,7 +170,6 @@ object CronTool : Tool {
     override val defaultInput = ToolInput.Text("0 9 * * 1-5")
     override val singleLineInput = true
 
-    /** Injetável para os testes. */
     var now: () -> Instant = { Clock.System.now() }
     var zone: () -> TimeZone = { TimeZone.currentSystemDefault() }
 

@@ -21,7 +21,6 @@ import dev.devtoolbox.ds.components.CopyButton
 import dev.devtoolbox.ds.components.Tag
 import dev.devtoolbox.ds.components.Text
 
-/** Arquétipo `regex`: o padrão, a string de teste com os trechos casados e a lista de matches. */
 @Composable
 fun RegexLayout(body: ToolBody.Regex, toolId: String, modifier: Modifier = Modifier) {
     val colors = Nocturne.colors

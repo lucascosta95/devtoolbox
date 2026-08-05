@@ -23,12 +23,6 @@ import dev.devtoolbox.ds.components.CardKicker
 import dev.devtoolbox.ds.components.CopyButton
 import dev.devtoolbox.ds.components.Text
 
-/**
- * Arquétipo `diff`.
- *
- * O DS é mono-accent: adição usa accent, remoção usa cinza com strikethrough — **nunca**
- * verde e vermelho.
- */
 @Composable
 fun DiffLayout(body: ToolBody.Diff, toolId: String, modifier: Modifier = Modifier) {
     val colors = Nocturne.colors
@@ -46,7 +40,6 @@ fun DiffLayout(body: ToolBody.Diff, toolId: String, modifier: Modifier = Modifie
                 Modifier
                     .padding(top = Nocturne.space.xs)
                     .horizontalScroll(rememberScrollState())
-                    // Largura da linha mais longa: as faixas de fundo ficam alinhadas entre si.
                     .width(IntrinsicSize.Max),
             ) {
                 for (line in body.lines) {
@@ -76,12 +69,6 @@ fun DiffLayout(body: ToolBody.Diff, toolId: String, modifier: Modifier = Modifie
     }
 }
 
-/**
- * O diff inteiro em texto, uma linha por linha, com os prefixos `+` / `-` / espaço.
- *
- * O hífen ASCII substitui o sinal de menos tipográfico da tela: o destino é um arquivo `.diff`
- * ou um comentário de PR, onde `-` é o que as ferramentas entendem.
- */
 private fun ToolBody.Diff.asPatch(): String = lines.joinToString("\n") { line ->
     val prefix = when (line.kind) {
         DiffKind.Add -> "+"

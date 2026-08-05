@@ -2,12 +2,6 @@ package dev.devtoolbox.ds
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Cores de destaque oferecidas na barra de título.
- *
- * O [id] é o que vai para disco — os hexadecimais podem ser reajustados sem invalidar a
- * preferência já salva de quem instalou uma versão anterior.
- */
 enum class AccentColor(val id: String, val label: String, val color: Color) {
     Blurple("blurple", "Blurple", Color(0xFF9184D9)),
     Cyan("cyan", "Ciano", Color(0xFF5AA9C9)),
@@ -23,24 +17,15 @@ enum class AccentColor(val id: String, val label: String, val color: Color) {
     }
 }
 
-/**
- * Tokens de accent derivados da cor escolhida, por mistura em OKLab.
- *
- * As proporções vêm do handoff e são diferentes por tema: no escuro a cor é clareada contra
- * `accent-100` para ficar legível sobre a tinta; no claro ela é escurecida contra `neutral-900`.
- */
 data class AccentTokens(
     val accent: Color,
-    /** Texto e ícone sobre a tinta de fundo. */
     val accent300: Color,
-    /** Estado pressionado. */
     val accent400: Color,
-    /** Tinta de fundo (item selecionado, badge, destaque do diff). */
     val accent900: Color,
 ) {
     companion object {
-        private val Light = Ramp.accent100 // #F5F4FF
-        private val Dark = Ramp.neutral900 // #292B31
+        private val Light = Ramp.accent100
+        private val Dark = Ramp.neutral900
 
         fun derive(accent: Color, isDark: Boolean): AccentTokens = if (isDark) {
             AccentTokens(

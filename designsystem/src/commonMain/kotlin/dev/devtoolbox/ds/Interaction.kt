@@ -18,10 +18,6 @@ import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * Indicação vazia: o Nocturne não usa ripple — hover e pressed são tintas do ramp,
- * aplicadas explicitamente por cada componente.
- */
 object NoIndication : IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode = NoIndicationNode()
     override fun equals(other: Any?): Boolean = other === this
@@ -35,11 +31,6 @@ private class NoIndicationNode : Modifier.Node(), DrawModifierNode {
 @Suppress("unused")
 private val indicationContract: Indication = NoIndication
 
-/**
- * Anel de foco do DS: `outline: 2px solid accent; outline-offset: 2px`.
- *
- * Desenha **fora** dos limites do componente, como o outline do CSS — por isso não usa borda.
- */
 @Composable
 fun Modifier.focusRing(
     focused: Boolean,
@@ -68,5 +59,4 @@ fun Modifier.focusRing(
     }
 }
 
-/** Opacidade de elemento desabilitado no DS. */
 const val DISABLED_ALPHA = 0.45f

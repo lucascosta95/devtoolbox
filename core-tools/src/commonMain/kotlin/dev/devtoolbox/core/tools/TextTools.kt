@@ -67,7 +67,6 @@ object RegexTool : Tool {
             return ToolOutput.Failure("Regex inválida: ${e.message?.lines()?.first() ?: "sintaxe"}")
         }
 
-        // Sem a flag `g`, só a primeira correspondência conta — como no JavaScript.
         val global = p.flags.contains('g')
         val found = regex.findAll(p.subject).let { if (global) it.toList() else it.take(1).toList() }
 

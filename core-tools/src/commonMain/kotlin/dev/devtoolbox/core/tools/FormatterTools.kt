@@ -123,7 +123,6 @@ object DiffTool : Tool {
 
     override fun run(input: ToolInput): ToolOutput {
         val pair = input as? ToolInput.Pair ?: return ToolOutput.Failure("Entrada inválida.")
-        // Quando os dois lados são JSON, compara a estrutura formatada — não a formatação.
         val (left, right) = Diff.normalizeJsonIfPossible(pair.left, pair.right)
         return ToolOutput.Success(ToolBody.Diff(Diff.lines(left, right)))
     }

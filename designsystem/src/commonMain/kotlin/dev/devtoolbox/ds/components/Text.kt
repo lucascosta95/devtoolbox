@@ -9,10 +9,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import dev.devtoolbox.ds.Nocturne
 
-/**
- * `Text` do DS sobre `BasicText` — o projeto não usa Material, então esta é a única
- * porta de entrada para texto e todo estilo vem de [Nocturne.type].
- */
 @Composable
 fun Text(
     text: String,

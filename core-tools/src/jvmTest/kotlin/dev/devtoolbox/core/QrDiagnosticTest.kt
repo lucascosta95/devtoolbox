@@ -6,7 +6,6 @@ import dev.devtoolbox.core.util.ReedSolomon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Isola em qual camada o encoder diverge da ZXing. */
 class QrDiagnosticTest {
 
     @Test
@@ -25,7 +24,6 @@ class QrDiagnosticTest {
 
     @Test
     fun generatorPolynomialMatchesZxing() {
-        // g10, publicado na norma: 1, 216, 194, 159, 111, 199, 94, 95, 113, 157, 193.
         assertEquals(
             listOf(1, 216, 194, 159, 111, 199, 94, 95, 113, 157, 193),
             ReedSolomon.generator(10).toList(),

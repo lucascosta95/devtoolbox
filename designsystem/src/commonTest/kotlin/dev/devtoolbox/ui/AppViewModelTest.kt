@@ -55,7 +55,6 @@ class AppViewModelTest {
         vm.onQueryChange("json")
         assertTrue(vm.state.value.favoriteTools.isEmpty())
         assertTrue(vm.state.value.recentTools.isEmpty())
-        // "json" casa com o JSON Formatter e com o Text/JSON Diff.
         assertEquals(
             listOf("json", "diff"),
             vm.state.value.categories.flatMap { it.second }.map { it.id },

@@ -1,10 +1,5 @@
 package dev.devtoolbox.core.util
 
-/**
- * Percent-encoding (RFC 3986) sobre bytes UTF-8, em Kotlin puro.
- *
- * O conjunto *unreserved* do RFC é `A-Z a-z 0-9 - . _ ~`; tudo mais é escapado.
- */
 object PercentEncoding {
 
     class DecodeException(message: String) : Exception(message)
@@ -51,7 +46,6 @@ object PercentEncoding {
         return out.toByteArray().decodeToString()
     }
 
-    /** Heurística do modo automático: há alguma sequência `%XX` no texto? */
     fun looksEncoded(text: String): Boolean =
         Regex("%[0-9a-fA-F]{2}").containsMatchIn(text)
 }

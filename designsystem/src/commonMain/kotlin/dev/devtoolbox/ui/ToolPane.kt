@@ -34,11 +34,6 @@ import dev.devtoolbox.ui.layouts.RegexLayout
 import dev.devtoolbox.ui.layouts.RowsLayout
 import dev.devtoolbox.ui.layouts.ValidateLayout
 
-/**
- * Painel de conteúdo: header comum, editor de entrada e o composable do arquétipo.
- *
- * Adicionar um arquétipo novo é acrescentar um ramo no `when` de [ToolBodyContent].
- */
 @Composable
 fun ToolPane(
     tool: Tool,
@@ -57,8 +52,6 @@ fun ToolPane(
             is ToolOutput.Failure -> output.body
         }
 
-        // `io` traz a entrada no card da esquerda e `image`, na área de soltar arquivo;
-        // os outros ganham um editor.
         val ownsItsInput = body is ToolBody.Io || body is ToolBody.Image
         if (!ownsItsInput) {
             ToolInputEditor(
@@ -75,7 +68,6 @@ fun ToolPane(
 
         when {
             body != null -> ToolBodyContent(tool.id, body, currentInput, onInputChange)
-            // Sem corpo aproveitável (ex.: JWT malformado): mantém só a entrada e o erro.
             else -> Unit
         }
     }
@@ -150,7 +142,6 @@ private fun ToolBodyContent(
     currentInput: ToolInput,
     onInputChange: (ToolInput) -> Unit,
 ) {
-    /** Regenerar = trocar a semente; é o que alimenta "Gerar novo exemplo". */
     fun bumpSeed() {
         val seed = (currentInput as? ToolInput.Seed)?.nonce ?: 0
         onInputChange(ToolInput.Seed(seed + 1))
@@ -185,10 +176,6 @@ private fun ToolBodyContent(
     }
 }
 
-/**
- * Exemplos alternados por ferramenta — o "Testar outro exemplo" do protótipo.
- * Cada lista alterna entre um valor válido e um inválido.
- */
 private val VALIDATOR_EXAMPLES: Map<String, List<String>> = mapOf(
     "cpf" to listOf("529.982.247-25", "111.444.777-30", "111.444.777-35"),
     "cnpj" to listOf("11.222.333/0001-81", "11.222.333/0001-00", "11.222.333/0002-62"),

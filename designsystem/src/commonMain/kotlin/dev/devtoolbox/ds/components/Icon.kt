@@ -15,12 +15,6 @@ import dev.devtoolbox.ds.resources.*
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-/**
- * Ícones Phosphor (peso *regular*; *fill* só em estrela favoritada e badges de status).
- *
- * O mapa nome→recurso é a única ponte entre o `icon: String` do core e os SVGs — um teste
- * do app garante que todo ícone referenciado pelo [dev.devtoolbox.core.ToolRegistry] existe aqui.
- */
 object PhosphorIcons {
 
     private val regular: Map<String, DrawableResource> = mapOf(
@@ -76,7 +70,6 @@ object PhosphorIcons {
     fun resource(name: String, fill: Boolean = false): DrawableResource? =
         if (fill) filled[name] ?: regular[name] else regular[name]
 
-    /** Nomes disponíveis — usado pelo teste de cobertura de ícones. */
     val names: Set<String> get() = regular.keys
 }
 

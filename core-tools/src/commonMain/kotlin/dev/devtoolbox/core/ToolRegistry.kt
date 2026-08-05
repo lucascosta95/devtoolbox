@@ -24,38 +24,28 @@ import dev.devtoolbox.core.tools.UrlTool
 import dev.devtoolbox.core.tools.UuidTool
 import dev.devtoolbox.core.tools.YamlFormatterTool
 
-/**
- * Catálogo de ferramentas, na ordem exata da sidebar.
- *
- * Registrar uma ferramenta nova = uma linha em [all] + uma classe + um teste.
- */
 object ToolRegistry {
 
     val all: List<Tool> = listOf(
-        // Encoding
         Base64Tool,
         JwtTool,
         UrlTool,
         HashTool,
         ImageBase64Tool,
-        // Formatters
         JsonFormatterTool,
         YamlFormatterTool,
         CurlFormatterTool,
         SqlFormatterTool,
         NrqlFormatterTool,
         DiffTool,
-        // Text
         StringCaseTool,
         RegexTool,
         LoremTool,
-        // Generators
         UuidTool,
         ColorTool,
         TimestampTool,
         CronTool,
         QrTool,
-        // Validators
         CpfTool,
         CnpjTool,
         PhoneTool,
@@ -66,13 +56,8 @@ object ToolRegistry {
 
     fun byId(id: String): Tool? = byId[id]
 
-    /** A primeira ferramenta do catálogo — usada como seleção padrão. */
     val default: Tool get() = all.first()
 
-    /**
-     * Filtra por nome **ou** categoria, `contains`, case-insensitive — mesma regra do protótipo.
-     * Query em branco devolve o catálogo inteiro.
-     */
     fun search(query: String): List<Tool> {
         val q = query.trim().lowercase()
         if (q.isEmpty()) return all
@@ -81,7 +66,6 @@ object ToolRegistry {
         }
     }
 
-    /** Agrupa o resultado da busca por categoria, descartando categorias vazias. */
     fun categorized(query: String = ""): List<Pair<Category, List<Tool>>> {
         val hits = search(query)
         return Category.entries

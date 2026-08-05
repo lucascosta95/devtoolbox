@@ -20,12 +20,6 @@ import dev.devtoolbox.ds.components.SecondaryButton
 import dev.devtoolbox.ds.components.StatusBadge
 import dev.devtoolbox.ds.components.Text
 
-/**
- * Arquétipo `validate`: o valor com o badge de status e o detalhamento abaixo.
- *
- * O status é anunciado por texto no badge, não só por cor — o DS é mono-accent e cor
- * sozinha não pode carregar significado.
- */
 @Composable
 fun ValidateLayout(
     body: ToolBody.Validate,
@@ -47,7 +41,6 @@ fun ValidateLayout(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Nocturne.space.md),
             ) {
-                // O valor e o botão andam juntos à esquerda; o badge fica preso à direita.
                 Row(
                     modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically,

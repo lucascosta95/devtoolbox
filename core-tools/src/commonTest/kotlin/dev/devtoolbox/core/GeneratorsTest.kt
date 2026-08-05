@@ -186,11 +186,7 @@ class ColorToolTest {
         val rows = (out.body as ToolBody.Rows).rows.associate { it.label to it.value }
         assertEquals("#9184d9", rows["HEX"])
         assertEquals("rgb(145, 132, 217)", rows["RGB"])
-        // O protótipo mostra 52%; o valor exato é 52.79%, que arredonda para 53%.
         assertEquals("hsl(249, 53%, 68%)", rows["HSL"])
-        // Valores pelas matrizes de Ottosson (sRGB→linear→LMS→OKLab→OKLCH), conferidos fora
-        // do projeto: L=0.6600, C=0.1245, H=289.55. O handoff traz 68.4% para o L, que não
-        // reproduz por esse caminho — C e H batem, então a divergência é só no L do protótipo.
         val oklch = rows["OKLCH"]!!
         val numbers = Regex("[\\d.]+").findAll(oklch).map { it.value.toDouble() }.toList()
         assertTrue(abs(numbers[0] - 66.0) < 0.1, "L fora do esperado: $oklch")
@@ -203,14 +199,12 @@ class ColorToolTest {
         for (hex in listOf("#9184d9", "#e4b73c", "#000000", "#ffffff", "#ff0000", "#1a2b3c")) {
             val rgb = ColorConvert.parse(hex)
             assertEquals(rgb, ColorConvert.parse(ColorConvert.toRgbString(rgb)), "rgb $hex")
-            // HSL exibe percentuais inteiros; a volta perde até ~2/255 por canal.
             val backFromHsl = ColorConvert.parse(ColorConvert.toHslString(rgb))
             assertTrue(abs(backFromHsl.r - rgb.r) <= 3, "hsl r de $hex")
             assertTrue(abs(backFromHsl.g - rgb.g) <= 3, "hsl g de $hex")
             assertTrue(abs(backFromHsl.b - rgb.b) <= 3, "hsl b de $hex")
 
             val backFromOklch = ColorConvert.parse(ColorConvert.toOklchString(rgb))
-            // OKLCH é arredondado na exibição; 2/255 de tolerância por canal.
             assertTrue(abs(backFromOklch.r - rgb.r) <= 2, "oklch r de $hex")
             assertTrue(abs(backFromOklch.g - rgb.g) <= 2, "oklch g de $hex")
             assertTrue(abs(backFromOklch.b - rgb.b) <= 2, "oklch b de $hex")
@@ -315,7 +309,6 @@ class CronToolTest {
         val r = rows("0 9 * * 1-5")
         assertEquals("Às 09:00 todos os dias úteis", r["Descrição"])
         assertEquals("1-5 (segunda a sexta)", r["Dia da semana"])
-        // 2026-08-02 é domingo; a próxima execução é segunda, dia 3, às 09:00.
         assertEquals("2026-08-03 09:00", r["Próxima execução"])
     }
 
@@ -367,7 +360,6 @@ class QrCodeTest {
     @Test
     fun producesTheRightMatrixSizeForVersionOne() {
         val modules = QrCode.encode("https://devtoolbox.dev")
-        // 22 bytes cabem na versão 2 (26 bytes), que mede 25×25.
         assertEquals(25, modules.size)
         assertTrue(modules.all { it.size == modules.size })
     }
@@ -377,7 +369,6 @@ class QrCodeTest {
         val m = QrCode.encode("OI")
         val size = m.size
         for ((row, col) in listOf(0 to 0, 0 to size - 7, size - 7 to 0)) {
-            // Anel externo escuro, anel interno claro, miolo 3×3 escuro.
             assertTrue(m[row][col], "canto ($row,$col) deveria ser escuro")
             assertTrue(m[row + 1][col + 1] == false, "anel claro faltando em ($row,$col)")
             assertTrue(m[row + 3][col + 3], "miolo faltando em ($row,$col)")
@@ -395,14 +386,12 @@ class QrCodeTest {
 
     @Test
     fun formatInformationMatchesTheSpecTable() {
-        // Tabela da ISO/IEC 18004 para o nível M, máscaras 0 a 7.
         val expected = listOf(0x5412, 0x5125, 0x5E7C, 0x5B4B, 0x45F9, 0x40CE, 0x4F97, 0x4AA0)
         assertEquals(expected, (0..7).map { QrCode.formatBits(it) })
     }
 
     @Test
     fun reedSolomonRemainderIsDivisibleByTheGenerator() {
-        // Propriedade definidora do código: dados + correção é múltiplo do polinômio gerador.
         val data = IntArray(16) { (it * 37 + 11) and 0xFF }
         val ec = ReedSolomon.encode(data, 10)
         val codeword = data + ec
@@ -424,9 +413,9 @@ class QrCodeTest {
 
     @Test
     fun growsVersionWithContentLength() {
-        assertEquals(21, QrCode.encode("a".repeat(10)).size)   // v1
-        assertEquals(25, QrCode.encode("a".repeat(20)).size)   // v2
-        assertEquals(29, QrCode.encode("a".repeat(40)).size)   // v3
+        assertEquals(21, QrCode.encode("a".repeat(10)).size)
+        assertEquals(25, QrCode.encode("a".repeat(20)).size)
+        assertEquals(29, QrCode.encode("a".repeat(40)).size)
     }
 
     @Test
@@ -443,9 +432,7 @@ class QrCodeTest {
 
     @Test
     fun alignmentPatternSurvivesTheMask() {
-        // A máscara não pode tocar módulos de função. Como o padrão de alinhamento é o único
-        // que não fica nas bordas, era o que escapava de uma lista de áreas reservadas.
-        val m = QrCode.encode("https://devtoolbox.dev") // v2: alinhamento centrado em (18,18)
+        val m = QrCode.encode("https://devtoolbox.dev")
         for (dr in -2..2) {
             for (dc in -2..2) {
                 val expected = dr == -2 || dr == 2 || dc == -2 || dc == 2 || (dr == 0 && dc == 0)
@@ -456,9 +443,6 @@ class QrCodeTest {
 
     @Test
     fun bothFormatCopiesCarryAValidFormatString() {
-        // Cada cópia precisa valer um dos 15-bit válidos do nível M, e as duas precisam
-        // concordar. Ancorar na tabela da norma é o que faz o teste ser independente da
-        // fórmula do código — comparar as cópias entre si passava por coincidência.
         val valid = setOf(0x5412, 0x5125, 0x5E7C, 0x5B4B, 0x45F9, 0x40CE, 0x4F97, 0x4AA0)
 
         for (text in listOf("https://devtoolbox.dev", "OI", "a".repeat(40), "teste 123")) {
@@ -494,9 +478,6 @@ class QrCodeTest {
 
     @Test
     fun dataModuleCountMatchesTheSpec() {
-        // v2 tem 625 módulos: 266 de função (localizadores+separadores 192, tempo 18,
-        // alinhamento 25, formato 31) e 359 de dados = 44 codewords × 8 + 7 bits de resto.
-        // Se o mapa de módulos de função estiver errado, esta conta não fecha.
         val m = QrCode.encode("https://devtoolbox.dev")
         assertEquals(25, m.size)
         val functionModules = QrDecoder.functionModuleCount(m.size, version = 2)
@@ -506,7 +487,6 @@ class QrCodeTest {
 
     @Test
     fun matrixDecodesBackToTheOriginalText() {
-        // A verificação que as invariantes estruturais não davam: ler a matriz de volta.
         for (text in listOf(
             "https://devtoolbox.dev",
             "OI",

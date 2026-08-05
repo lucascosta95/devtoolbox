@@ -23,12 +23,6 @@ import dev.devtoolbox.ds.components.Divider
 import dev.devtoolbox.ds.components.LabelValueRow
 import dev.devtoolbox.ds.components.SecondaryButton
 
-/**
- * Arquétipos `list` e `listgen`: linhas label/valor separadas por divisor.
- *
- * Toda linha tem botão de copiar; o que [ToolBody.Rows.regenerable] muda é apenas a presença
- * do "Gerar novo exemplo".
- */
 @Composable
 fun RowsLayout(
     body: ToolBody.Rows,
@@ -66,7 +60,6 @@ fun RowsLayout(
     }
 }
 
-/** Amostra de cor do Color Converter: 56 dp de altura, raio sm, borda divider. */
 @Composable
 private fun Swatch(hex: String) {
     val color = parseHex(hex) ?: return

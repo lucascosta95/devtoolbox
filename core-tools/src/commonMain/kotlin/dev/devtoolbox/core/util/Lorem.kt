@@ -2,12 +2,6 @@ package dev.devtoolbox.core.util
 
 import kotlin.random.Random
 
-/**
- * Gerador de texto de preenchimento, determinístico por semente.
- *
- * Determinismo importa: é o que permite testar o gerador sem congelar o relógio nem
- * injetar um `Random` de fora da assinatura pura de `Tool.run`.
- */
 object Lorem {
 
     private val WORDS = listOf(
@@ -20,12 +14,10 @@ object Lorem {
         "culpa", "qui", "officia", "deserunt", "mollit", "anim", "id", "est", "laborum",
     )
 
-    /** Gera [paragraphs] parágrafos com 3 a 5 frases cada. */
     fun paragraphs(count: Int, seed: Int): List<String> {
         val random = Random(seed)
         return (0 until count).map { index ->
             val sentences = (0 until random.nextInt(3, 6)).map { sentence(random) }
-            // O primeiro parágrafo começa com a abertura clássica.
             if (index == 0) {
                 ("Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
                     sentences.joinToString(" ")).trim()

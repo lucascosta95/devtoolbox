@@ -25,20 +25,9 @@ import dev.devtoolbox.ds.components.CardKicker
 import dev.devtoolbox.ds.components.CopyButton
 import dev.devtoolbox.ds.components.Text
 
-/**
- * Arquétipo `qr`: o código à esquerda e o conteúdo à direita.
- *
- * O QR é desenhado em `Canvas` a partir da matriz de módulos do core — sem imagem intermediária.
- * O fundo é sempre claro (`neutral-100`) com módulos escuros, porque leitores esperam esse
- * contraste; inverter no tema escuro quebraria a leitura.
- */
 @Composable
 fun QrLayout(body: ToolBody.Qr, toolId: String, modifier: Modifier = Modifier) {
-    // Módulo menor = zona de silêncio menor, já que ela é 4 × módulo.
     val cellSize = 7.dp
-    // A norma exige uma zona de silêncio de **4 módulos**; sem ela muitos leitores não
-    // encontram os padrões de localização. É o mínimo — não dá para apertar mais. Como a
-    // margem é proporcional ao módulo, o jeito de deixá-la discreta é o módulo menor.
     val quietZone = cellSize * 4
     val moduleCount = body.modules.size
     val boardSize = cellSize * moduleCount + quietZone * 2
@@ -53,8 +42,6 @@ fun QrLayout(body: ToolBody.Qr, toolId: String, modifier: Modifier = Modifier) {
                 .size(boardSize)
                 .clip(RoundedCornerShape(Nocturne.radii.sm))
                 .background(Ramp.neutral100)
-                // Sem borda: com a moldura, a zona de silêncio lia como um quadro grosso em
-                // vez de margem do próprio código.
                 .padding(quietZone),
         ) {
             Canvas(Modifier.size(cellSize * moduleCount)) {
@@ -65,7 +52,6 @@ fun QrLayout(body: ToolBody.Qr, toolId: String, modifier: Modifier = Modifier) {
                         drawRect(
                             color = Ramp.neutral900,
                             topLeft = Offset(col * cell, row * cell),
-                            // +0.5 evita fresta entre módulos quando `cell` não é inteiro.
                             size = Size(cell + 0.5f, cell + 0.5f),
                         )
                     }

@@ -3,10 +3,6 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
-/**
- * A versão da aplicação chega ao código por um arquivo gerado, não por constante escrita à mão:
- * `gradle.properties` é a fonte única, e os instaladores leem a mesma propriedade.
- */
 val appVersion: String = providers.gradleProperty("devtoolbox.version").get()
 
 val generateBuildInfo = tasks.register("generateBuildInfo") {
@@ -48,9 +44,6 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        // ZXing é JVM-only e entra **apenas** em teste: o encoder de produção continua
-        // sem dependências, mas a matriz que ele gera é conferida contra uma implementação
-        // de referência.
         jvmTest.dependencies {
             implementation(libs.zxing.core)
         }

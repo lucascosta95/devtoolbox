@@ -1,16 +1,5 @@
 package dev.devtoolbox.core
 
-/**
- * Decodificador mínimo de QR, **só para os testes**.
- *
- * Existe porque não há leitor de QR nem lib de referência no ambiente: sem ele, o encoder
- * ficaria validado apenas por invariantes estruturais, que não pegam erro de bit.
- * Lê pelo caminho inverso do encoder mas **de forma independente** — recupera a máscara a
- * partir da informação de formato gravada na matriz, em vez de receber qual foi usada.
- *
- * Não corrige erros: se o encoder errar um bit de dados, a saída sai errada — que é
- * exatamente o que se quer detectar.
- */
 object QrDecoder {
 
     class DecodeException(message: String) : Exception(message)
@@ -28,7 +17,6 @@ object QrDecoder {
         intArrayOf(6, 28, 50),
     )
 
-    /** Quantos módulos de função a versão tem — usado para conferir o mapa contra a norma. */
     fun functionModuleCount(size: Int, version: Int): Int =
         functionMap(size, version).sumOf { row -> row.count { it } }
 
@@ -41,7 +29,6 @@ object QrDecoder {
         val mask = readMask(modules)
         val function = functionMap(size, version)
 
-        // Desfaz a máscara nos módulos de dados.
         val unmasked = Array(size) { row ->
             BooleanArray(size) { col ->
                 val bit = modules[row][col]
@@ -54,7 +41,6 @@ object QrDecoder {
         return readPayload(data, version)
     }
 
-    /** Lê a informação de formato da primeira cópia e recupera nível de correção e máscara. */
     private fun readMask(m: List<List<Boolean>>): Int {
         var format = 0
         for (i in 0..14) {
@@ -65,8 +51,6 @@ object QrDecoder {
                 i == 8 -> m[7][8]
                 else -> m[14 - i][8]
             }
-            // MSB primeiro: (8,0) carrega o bit 14. Ler LSB primeiro era o mesmo engano do
-            // encoder — e por isso este decodificador não pegava o bug.
             if (bit) format = format or (1 shl (14 - i))
         }
         val unmasked = format xor 0b101010000010010
@@ -86,7 +70,6 @@ object QrDecoder {
         else -> ((row + col) % 2 + (row * col) % 3) % 2 == 0
     }
 
-    /** Mapa dos módulos de função, derivado das regras da norma. */
     private fun functionMap(size: Int, version: Int): Array<BooleanArray> {
         val f = Array(size) { BooleanArray(size) }
         fun block(row: Int, col: Int, h: Int, w: Int) {
@@ -94,13 +77,10 @@ object QrDecoder {
                 if (r in 0 until size && c in 0 until size) f[r][c] = true
             }
         }
-        // Localizadores + separadores + áreas de formato.
         block(0, 0, 9, 9)
         block(0, size - 8, 9, 8)
         block(size - 8, 0, 8, 9)
-        // Padrões de tempo.
         for (i in 0 until size) { f[6][i] = true; f[i][6] = true }
-        // Padrões de alinhamento.
         val centers = ALIGNMENT_CENTERS[version - 1]
         for (r in centers) for (c in centers) {
             val nearFinder = (r <= 8 && c <= 8) || (r <= 8 && c >= size - 9) || (r >= size - 9 && c <= 8)
@@ -110,7 +90,6 @@ object QrDecoder {
         return f
     }
 
-    /** Percorre o zigue-zague na mesma ordem do encoder e remonta os codewords. */
     private fun readCodewords(m: Array<BooleanArray>, function: Array<BooleanArray>): IntArray {
         val size = m.size
         val bits = mutableListOf<Boolean>()
@@ -135,7 +114,6 @@ object QrDecoder {
         }
     }
 
-    /** Desfaz a intercalação de blocos e devolve só os codewords de dados, em ordem. */
     private fun deinterleave(codewords: IntArray, version: Int): IntArray {
         val layout = BLOCKS_M[version - 1]
         val ecCount = EC_PER_BLOCK_M[version - 1]
@@ -154,7 +132,6 @@ object QrDecoder {
                 if (col < block.size) block[col] = codewords[index++]
             }
         }
-        // Os codewords de correção vêm depois; para conferir os dados não são necessários.
         val expected = DATA_CODEWORDS_M[version - 1]
         val out = blocks.flatMap { it.toList() }.toIntArray()
         if (out.size != expected) throw DecodeException("esperava $expected codewords, li ${out.size}")
@@ -169,7 +146,6 @@ object QrDecoder {
         if (mode != 0b0100) throw DecodeException("modo $mode não é byte")
 
         val countBits = if (version <= 9) 8 else 16
-        // O contador começa 4 bits depois do início: é preciso ler o fluxo desalinhado.
         var bitPos = 4
         fun read(n: Int): Int {
             var v = 0

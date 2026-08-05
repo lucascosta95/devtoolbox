@@ -6,10 +6,6 @@ import dev.devtoolbox.ds.components.PhosphorIcons
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-/**
- * Guarda contra ícone faltando em runtime: todo nome referenciado pelo core precisa
- * existir no mapa de recursos do [PhosphorIcons].
- */
 class IconCoverageTest {
 
     @Test
@@ -26,7 +22,6 @@ class IconCoverageTest {
 
     @Test
     fun chromeIconsAreMapped() {
-        // Ícones usados pela moldura da app, que não vêm do registro de ferramentas.
         val chrome = listOf(
             "wrench", "magnifying-glass", "star", "clock-counter-clockwise",
             "sun", "moon", "arrow-right", "check", "copy", "x-circle", "drop-half", "image-square",

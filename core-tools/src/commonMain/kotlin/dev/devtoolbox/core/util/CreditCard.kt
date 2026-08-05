@@ -1,23 +1,9 @@
 package dev.devtoolbox.core.util
 
-/**
- * Validação de número de cartão pelo algoritmo de Luhn, com detecção de bandeira por BIN.
- *
- * O veredito é **só** o Luhn (mais comprimento e caracteres aceitos): a bandeira é informativa.
- * Um número com dígito verificador correto continua válido mesmo que o comprimento fuja do
- * usual para a bandeira detectada — isso vira uma observação na linha "Bandeira", não uma
- * reprovação, porque emissores lançam faixas novas o tempo todo.
- */
 object CreditCard {
-
-    /** Faixa aceita pela ISO/IEC 7812 — nenhum cartão real fica fora dela. */
     private const val MIN_DIGITS = 12
     private const val MAX_DIGITS = 19
 
-    /**
-     * Bandeira: [prefixes] casa por prefixo literal, [ranges] por faixa numérica do BIN
-     * (comparada com os primeiros dígitos, no comprimento do próprio limite).
-     */
     data class Brand(
         val name: String,
         val prefixes: List<String> = emptyList(),
@@ -32,10 +18,6 @@ object CreditCard {
             }
     }
 
-    /**
-     * Ordem importa: Elo e Hipercard emitem dentro de faixas que começam com 4, 5 e 6 e
-     * seriam engolidas por Visa/Mastercard/Discover se viessem depois.
-     */
     val brands: List<Brand> = listOf(
         Brand(
             name = "Elo",
@@ -71,10 +53,6 @@ object CreditCard {
 
     fun brandOf(digits: String): Brand? = brands.firstOrNull { it.matches(digits) }
 
-    /**
-     * Soma de Luhn: da direita para a esquerda, cada segundo dígito dobra e, passando de 9,
-     * perde 9 (equivale a somar os algarismos do dobro). Válido quando a soma é múltipla de 10.
-     */
     fun luhnSum(digits: String): Int =
         digits.reversed().foldIndexed(0) { index, acc, char ->
             val digit = char - '0'
@@ -87,17 +65,14 @@ object CreditCard {
         return digits.length in MIN_DIGITS..MAX_DIGITS && luhnSum(digits) % 10 == 0
     }
 
-    /** Tira espaços e hifens; devolve `null` se sobrar qualquer coisa que não seja dígito. */
     fun normalize(input: String): String? {
         val stripped = input.trim().filterNot { it == ' ' || it == '-' }
         return if (stripped.isNotEmpty() && stripped.all { it.isDigit() }) stripped else null
     }
 
-    /** Dígito verificador que tornaria [payload] (o número sem o último dígito) válido. */
     fun expectedCheckDigit(payload: String): Int {
         val sum = payload.reversed().foldIndexed(0) { index, acc, char ->
             val digit = char - '0'
-            // O payload está deslocado uma casa: o que aqui é índice par dobra.
             val weighted = if (index % 2 == 0) (digit * 2).let { if (it > 9) it - 9 else it } else digit
             acc + weighted
         }
@@ -165,7 +140,6 @@ object CreditCard {
         }
     }
 
-    /** Agrupa em blocos de 4 — Amex, com 15 dígitos, usa o 4-6-5 tradicional. */
     fun format(digits: String): String = when {
         digits.length == 15 -> listOf(
             digits.take(4),

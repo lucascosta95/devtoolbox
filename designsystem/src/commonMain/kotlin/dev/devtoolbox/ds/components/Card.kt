@@ -16,7 +16,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.Nocturne
 
-/** Card `.card` do DS: fundo surface, borda divider, raio md. */
 @Composable
 fun Card(
     modifier: Modifier = Modifier,
@@ -32,7 +31,6 @@ fun Card(
     )
 }
 
-/** Kicker do card: 10 sp, uppercase, tracking 0.1em, accent. */
 @Composable
 fun CardKicker(text: String, modifier: Modifier = Modifier, trailing: @Composable (() -> Unit)? = null) {
     Row(
@@ -52,7 +50,6 @@ fun CardKicker(text: String, modifier: Modifier = Modifier, trailing: @Composabl
     }
 }
 
-/** Cabeçalho de seção da sidebar: 10.5 sp, uppercase, tracking 0.06em, 50% + ícone. */
 @Composable
 fun SectionHeader(text: String, icon: String, iconFill: Boolean = false, modifier: Modifier = Modifier) {
     Row(
@@ -79,7 +76,6 @@ fun SectionHeader(text: String, icon: String, iconFill: Boolean = false, modifie
     }
 }
 
-/** Tag `.tag-neutral` / `.tag-accent`: 11 sp, padding 3×10, raio 6. */
 @Composable
 fun Tag(text: String, modifier: Modifier = Modifier, accent: Boolean = false) {
     val colors = Nocturne.colors

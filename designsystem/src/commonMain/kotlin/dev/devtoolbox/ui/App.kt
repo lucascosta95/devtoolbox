@@ -43,7 +43,6 @@ import dev.devtoolbox.ds.components.LocalCopyFeedback
 import dev.devtoolbox.ds.components.PhosphorIcon
 import dev.devtoolbox.ds.components.Text
 
-/** Largura máxima do conteúdo, alinhado à esquerda (760 px no protótipo). */
 private val CONTENT_MAX_WIDTH = 760.dp
 
 @Composable
@@ -58,7 +57,6 @@ fun App(
     val searchFocus = remember { FocusRequester() }
     val rootFocus = remember { FocusRequester() }
     var searchFocused by remember { mutableStateOf(false) }
-    // "Copiado" aparece em um botão de cada vez — ver CopyFeedbackState.
     val copyFeedback = remember { CopyFeedbackState() }
 
     LaunchedEffect(Unit) { runCatching { rootFocus.requestFocus() } }
@@ -125,12 +123,6 @@ fun App(
     }
 }
 
-/**
- * Barra de título de 44 px.
- *
- * Só o miolo: os controles de janela ficam com a decoração nativa da plataforma —
- * a barra custom do protótipo era ilustração.
- */
 @Composable
 private fun TitleBar(
     theme: ThemeMode,
@@ -158,7 +150,6 @@ private fun TitleBar(
         ) {
             AccentPicker(selected = accent, onSelect = onSelectAccent)
 
-            // Divisor vertical de 1 × 18 px entre o seletor de cor e o toggle de tema.
             Box(Modifier.width(1.dp).height(18.dp).background(colors.divider))
 
             IconButton(

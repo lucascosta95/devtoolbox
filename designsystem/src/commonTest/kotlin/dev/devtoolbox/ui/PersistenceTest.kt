@@ -63,7 +63,6 @@ class PersistenceTest {
             recent = listOf("ferramenta-removida", "json"),
         )
         val state = AppState().mergedWith(saved)
-        // Cai no padrão em vez de apontar para uma ferramenta que não existe mais.
         assertEquals(AppState().selectedId, state.selectedId)
         assertEquals(setOf("base64"), state.favorites)
         assertEquals(listOf("json"), state.recent)
@@ -114,7 +113,6 @@ class PersistenceTest {
         advanceTimeBy(PERSIST_DEBOUNCE_MS + 50)
         assertEquals("amber", store.load()?.accent)
 
-        // E volta como enum na próxima abertura.
         assertEquals(
             AccentColor.Amber,
             AppViewModel(backgroundScope, AppState(), store).state.value.accent,

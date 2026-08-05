@@ -5,11 +5,6 @@ import dev.devtoolbox.core.persistence.StateCodec
 import dev.devtoolbox.core.persistence.StateStore
 import java.io.File
 
-/**
- * Estado em `state.json`, no diretório de configuração de cada SO:
- * `$XDG_CONFIG_HOME/devtoolbox` (Linux), `~/Library/Application Support/DevToolbox` (macOS)
- * e `%APPDATA%\DevToolbox` (Windows).
- */
 class FileStateStore(private val file: File) : StateStore {
 
     override fun load(): PersistedState? =
@@ -18,7 +13,6 @@ class FileStateStore(private val file: File) : StateStore {
     override fun save(state: PersistedState) {
         runCatching {
             file.parentFile?.mkdirs()
-            // Escrita atômica: um desligamento no meio não deixa um JSON pela metade.
             val temp = File(file.parentFile, "${file.name}.tmp")
             temp.writeText(StateCodec.encode(state))
             if (!temp.renameTo(file)) {

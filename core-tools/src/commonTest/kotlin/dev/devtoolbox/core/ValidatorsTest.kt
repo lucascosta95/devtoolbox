@@ -26,7 +26,6 @@ class CpfTest {
 
     @Test
     fun acceptsTheKnownValidVariantOfTheSameBase() {
-        // 111.444.777-35 é o CPF válido para essa base; -30 não é.
         assertTrue(Cpf.validate("111.444.777-35").valid)
     }
 
@@ -48,8 +47,6 @@ class CpfTest {
 
     @Test
     fun anyBaseWithItsComputedDigitsIsValid() {
-        // Propriedade do algoritmo: os DVs calculados sempre fecham a validação — inclusive
-        // nas bases cujo resto < 2 produz dígito 0.
         var checked = 0
         for (base in listOf("529982247", "111444777", "000000001", "123456789", "987654321")) {
             if (base.all { it == base[0] }) continue
@@ -60,7 +57,6 @@ class CpfTest {
         assertEquals(5, checked)
     }
 
-    /** Reimplementação independente dos DVs, para não testar o código com ele mesmo. */
     private fun digitsFor(base: String): String {
         fun dv(digits: String, start: Int): Int {
             var sum = 0

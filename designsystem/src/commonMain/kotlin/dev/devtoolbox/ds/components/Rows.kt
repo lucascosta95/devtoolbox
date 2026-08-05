@@ -18,16 +18,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.Nocturne
 
-/** Coluna de labels — 170 dp acomoda "Dígito verificador" em uma linha na JetBrains Mono. */
 private val LABEL_WIDTH = 170.dp
 
-/** Linha label/valor: label 12 sp a 55%, valor 13 sp. */
 @Composable
 fun LabelValueRow(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
-    /** O arquétipo `image` usa uma coluna mais estreita — o card dele é curto. */
     labelWidth: Dp = LABEL_WIDTH,
     trailing: @Composable (() -> Unit)? = null,
 ) {
@@ -40,7 +37,6 @@ fun LabelValueRow(
             label,
             style = Nocturne.type.label,
             color = Nocturne.colors.text(0.55f),
-            // JetBrains Mono é mais larga que a Inter: 150 dp já não cabia os labels longos.
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.width(labelWidth),
@@ -48,8 +44,6 @@ fun LabelValueRow(
         Text(
             value,
             style = Nocturne.type.item,
-            // Hashes e tokens quebram em várias linhas; passando de três, elipse — o valor
-            // inteiro continua a um clique de distância, no botão de copiar.
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -58,13 +52,11 @@ fun LabelValueRow(
     }
 }
 
-/** Divisor de 1 px na cor divider. */
 @Composable
 fun Divider(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth().height(1.dp).background(Nocturne.colors.divider))
 }
 
-/** Badge de status dos validadores: accent quando válido, neutro quando inválido. */
 @Composable
 fun StatusBadge(valid: Boolean, modifier: Modifier = Modifier) {
     val colors = Nocturne.colors

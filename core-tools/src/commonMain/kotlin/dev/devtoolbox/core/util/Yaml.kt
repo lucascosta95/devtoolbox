@@ -1,14 +1,5 @@
 package dev.devtoolbox.core.util
 
-/**
- * Parser/emissor de um **subset** de YAML, próprio, em `commonMain`.
- *
- * Suportado: mapas e sequências em bloco, mapas e sequências em *flow* (`{a: 1}`, `[1, 2]`),
- * escalares simples e entre aspas, comentários `#`, documento único.
- *
- * **Não** suportado (erro explícito): âncoras/aliases (`&`/`*`), múltiplos documentos (`---`),
- * tags (`!!str`) e escalares em bloco (`|`, `>`). Os limites estão documentados no README.
- */
 sealed interface YamlValue {
     data class Scalar(val text: String, val quoted: Boolean = false) : YamlValue
     data class Seq(val items: List<YamlValue>) : YamlValue
@@ -34,7 +25,6 @@ object Yaml {
             when {
                 t.startsWith("---") || t.startsWith("...") ->
                     fail(line, "múltiplos documentos não são suportados")
-                // Âncora/alias aparece no começo da linha ou logo após a chave: "base: &ref".
                 ANCHOR.containsMatchIn(t) -> fail(line, "âncoras e aliases não são suportados")
                 t.startsWith("!") -> fail(line, "tags não são suportadas")
                 Regex(""":\s*[|>][-+]?\s*$""").containsMatchIn(t) ->
@@ -47,10 +37,6 @@ object Yaml {
         return Parser(expanded).parseBlock(expanded.first().indent)
     }
 
-    /**
-     * Reescreve `- chave: valor` como duas linhas (`-` e a chave indentada), para que a
-     * sequência e o mapa aninhado sejam analisados pelas mesmas regras de bloco.
-     */
     private fun expandInlineSeqMaps(lines: List<Line>): List<Line> {
         val out = mutableListOf<Line>()
         for (line in lines) {
@@ -84,7 +70,6 @@ object Yaml {
                     when (item) {
                         is YamlValue.Scalar -> sb.append(renderScalar(item)).append('\n')
                         else -> {
-                            // Estruturas aninhadas em item de lista começam na linha seguinte.
                             sb.append('\n')
                             write(sb, item, indent, depth + 1, false)
                         }
@@ -176,7 +161,6 @@ object Yaml {
                 items += if (rest.isNotEmpty()) {
                     parseFlowOrScalar(rest, line)
                 } else {
-                    // `- ` sozinho: o valor é o bloco indentado abaixo (mapa ou sequência).
                     val next = lines.getOrNull(pos)
                     if (next != null && next.indent > indent) parseBlock(next.indent)
                     else YamlValue.Scalar("")
@@ -185,7 +169,6 @@ object Yaml {
             return YamlValue.Seq(items)
         }
 
-        /** Posição do `:` que separa chave de valor, ignorando `:` dentro de aspas. */
         fun findKeyColon(line: Line): Int? {
             var quote: Char? = null
             val t = line.trimmed
@@ -207,7 +190,6 @@ object Yaml {
         }
     }
 
-    /** Parser das formas *flow* — `{a: 1, b: [2, 3]}`. */
     private class FlowParser(val text: String, val line: Line) {
         var pos = 0
 

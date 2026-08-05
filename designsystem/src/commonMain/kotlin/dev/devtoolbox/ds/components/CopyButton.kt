@@ -32,15 +32,8 @@ import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.focusRing
 import kotlinx.coroutines.delay
 
-/** Duração do feedback de "Copiado", igual ao protótipo. */
 const val COPIED_FEEDBACK_MS = 1300L
 
-/**
- * Qual botão está mostrando "Copiado" — **um por vez** em toda a aplicação.
- *
- * O protótipo guarda um único `copiedKey`; com um botão de copiar em cada valor exibido, dois
- * feedbacks simultâneos deixariam dúvida sobre o que foi de fato para a área de transferência.
- */
 @Stable
 class CopyFeedbackState {
     var copiedKey: String? by mutableStateOf(null)
@@ -57,18 +50,11 @@ class CopyFeedbackState {
 
 val LocalCopyFeedback = staticCompositionLocalOf { CopyFeedbackState() }
 
-/**
- * Botão fantasma de copiar: escreve no clipboard e vira ✓ por 1.3 s.
- *
- * [copyKey] identifica o botão no feedback compartilhado — precisa ser único na tela
- * (normalmente `"${toolId}-${papel}"`, com o índice quando é uma lista).
- */
 @Composable
 fun CopyButton(
     text: String,
     copyKey: String,
     modifier: Modifier = Modifier,
-    /** `null` = só o ícone, o padrão do handoff; com texto vira "Copiar" / "Copiado". */
     label: String? = null,
     copiedLabel: String = "Copiado",
     contentDescription: String = "Copiar",
@@ -111,7 +97,6 @@ fun CopyButton(
                 feedback.markCopied(copyKey)
             }
             .semantics { this.contentDescription = if (copied) copiedLabel else contentDescription }
-            // 3×6 px quando é só ícone, como o `.btn-ghost` compacto do protótipo.
             .padding(horizontal = if (label == null) 6.dp else 8.dp, vertical = 3.dp),
     ) {
         PhosphorIcon(if (copied) "check" else "copy", size = 13.dp, tint = contentColor)

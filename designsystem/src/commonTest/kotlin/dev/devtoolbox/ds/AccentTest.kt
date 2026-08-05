@@ -36,8 +36,6 @@ class AccentTest {
 
     @Test
     fun mixInterpolatesPerceptuallyNotInLinearLight() {
-        // Misturar em luz linear puxa o meio-termo para o claro (a média de 0x91 e 0x29 dá
-        // 109 em vez de 90); OKLab respeita a lightness percebida e fica no meio de verdade.
         val mixed = Oklab.mix(Color(0xFF9184D9), Color(0xFF292B31), 0.5f)
         val linearLightMid = ((0x91 / 255f).srgbToLinear() + (0x29 / 255f).srgbToLinear()) / 2f
 
@@ -59,11 +57,9 @@ class AccentTest {
         val tokens = AccentTokens.derive(AccentColor.Blurple.color, isDark = true)
         val accentLuma = luma(tokens.accent)
 
-        // accent-300 e accent-400 são clareados contra #F5F4FF; accent-900 é a tinta escura.
         assertTrue(luma(tokens.accent300) > accentLuma)
         assertTrue(luma(tokens.accent400) > accentLuma)
         assertTrue(luma(tokens.accent900) < accentLuma)
-        // 45% da cor clareia mais que 72% dela.
         assertTrue(luma(tokens.accent300) > luma(tokens.accent400))
     }
 
@@ -90,7 +86,6 @@ class AccentTest {
     fun themeColorsFollowTheChosenAccent() {
         val teal = colorsFor(ThemeMode.Dark, AccentColor.Teal)
         assertEquals(AccentColor.Teal.color, teal.accent)
-        // Tudo que usa accent — item selecionado, tags, badges — sai destes dois tokens.
         assertEquals(teal.accents.accent900, teal.accentSurface)
         assertEquals(teal.accents.accent300, teal.onAccentSurface)
         assertTrue(teal.accentSurface != colorsFor(ThemeMode.Dark, AccentColor.Rose).accentSurface)

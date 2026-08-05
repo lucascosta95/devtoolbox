@@ -1,10 +1,5 @@
 package dev.devtoolbox.core.util
 
-/**
- * Base64 (RFC 4648) em Kotlin puro — padrão e url-safe.
- *
- * Implementado à mão para manter o core 100% `commonMain`, sem `java.util.Base64`.
- */
 object Base64 {
 
     private const val STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
@@ -47,7 +42,6 @@ object Base64 {
         return sb.toString()
     }
 
-    /** Decodifica aceitando os dois alfabetos e padding opcional. Lança [DecodeException]. */
     fun decodeToBytes(text: String): ByteArray {
         val clean = text.filterNot { it == '\n' || it == '\r' || it == ' ' || it == '\t' }
             .trimEnd('=')
@@ -63,14 +57,12 @@ object Base64 {
                 out.add((buffer ushr bits and 0xFF).toByte())
             }
         }
-        // Sobra de 6 bits significa um caractere solto — comprimento inválido.
         if (bits >= 6) throw DecodeException("comprimento inválido para Base64")
         return out.toByteArray()
     }
 
     fun decode(text: String): String = decodeToBytes(text).decodeToString()
 
-    /** Heurística usada pelo modo automático: o texto *parece* Base64 válido? */
     fun looksLikeBase64(text: String): Boolean {
         val clean = text.filterNot { it == '\n' || it == '\r' || it == ' ' || it == '\t' }
         if (clean.length < 4 || clean.any { value(it) == null && it != '=' }) return false

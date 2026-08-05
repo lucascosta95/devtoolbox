@@ -1,11 +1,5 @@
 package dev.devtoolbox.core.util
 
-/**
- * Conversão entre as oito caixas do catálogo.
- *
- * A tokenização quebra em espaços, `_`, `-`, `.` e nas fronteiras de camelCase — de forma que
- * qualquer uma das oito saídas possa ser reconvertida em qualquer outra.
- */
 object StringCase {
 
     fun tokenize(text: String): List<String> {
@@ -22,12 +16,10 @@ object StringCase {
         for ((i, c) in text.withIndex()) {
             when {
                 c == ' ' || c == '_' || c == '-' || c == '.' || c == '\t' -> flush()
-                // Fronteira camelCase: minúscula/dígito seguida de maiúscula.
                 c.isUpperCase() && i > 0 && (text[i - 1].isLowerCase() || text[i - 1].isDigit()) -> {
                     flush()
                     current.append(c)
                 }
-                // Fim de uma sigla: "HTTPServer" → "HTTP" + "Server".
                 c.isUpperCase() && i > 0 && text[i - 1].isUpperCase() &&
                     i + 1 < text.length && text[i + 1].isLowerCase() -> {
                     flush()

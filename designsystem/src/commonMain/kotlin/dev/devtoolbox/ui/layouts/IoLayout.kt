@@ -22,14 +22,8 @@ import dev.devtoolbox.ds.components.CopyButton
 import dev.devtoolbox.ds.components.PhosphorIcon
 import dev.devtoolbox.ds.components.Text
 
-/** Altura mínima dos dois cards — mantém o par estável enquanto a saída cresce. */
 private val CARD_MIN_HEIGHT = 180.dp
 
-/**
- * Arquétipo `io`: dois cards lado a lado com a seta entre eles.
- *
- * O card de entrada é **editável** — no protótipo era estático; aqui é a entrada real.
- */
 @Composable
 fun IoLayout(
     body: ToolBody.Io,
@@ -48,8 +42,6 @@ fun IoLayout(
                 CopyButton(inputText, "$toolId-in", contentDescription = "Copiar entrada")
             }
             Box(Modifier.padding(top = Nocturne.space.xs)) {
-                // O campo lê a entrada **ao vivo** do estado, não a saída debounced —
-                // senão a digitação ficaria 150 ms atrasada.
                 CodeTextField(
                     value = inputText,
                     onValueChange = onInputChange,

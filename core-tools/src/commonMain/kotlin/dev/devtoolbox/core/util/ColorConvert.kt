@@ -5,21 +5,11 @@ import kotlin.math.cbrt
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-/**
- * Conversão entre HEX, RGB, HSL e OKLCH.
- *
- * OKLCH usa o caminho canônico sRGB → linear → LMS → OKLab → OKLCH, com as matrizes de
- * Björn Ottosson. Os valores são conferidos por round-trip nos testes.
- */
 data class Rgb(val r: Int, val g: Int, val b: Int)
 
 class ColorParseException(message: String) : Exception(message)
 
 object ColorConvert {
-
-    // ------------------------------------------------------------- parsing
-
-    /** Aceita `#rgb`, `#rrggbb`, `rgb(r, g, b)`, `hsl(h, s%, l%)` e `oklch(l% c h)`. */
     fun parse(text: String): Rgb {
         val t = text.trim().lowercase()
         return when {
@@ -67,12 +57,9 @@ object ColorConvert {
     private fun parseOklch(text: String): Rgb {
         val n = numbers(text)
         if (n.size < 3) throw ColorParseException("oklch() precisa de três componentes.")
-        // O primeiro valor pode vir como 68.4% ou 0.684.
         val l = if (text.contains('%')) n[0] / 100.0 else n[0]
         return oklchToRgb(l, n[1], n[2])
     }
-
-    // --------------------------------------------------------- formatação
 
     fun toHex(c: Rgb): String =
         "#" + listOf(c.r, c.g, c.b).joinToString("") { it.coerceIn(0, 255).toString(16).padStart(2, '0') }
@@ -94,8 +81,6 @@ object ColorConvert {
         val rounded = (value * factor).roundToInt() / factor
         return if (decimals == 0) rounded.roundToInt().toString() else rounded.toString()
     }
-
-    // ---------------------------------------------------------------- HSL
 
     fun rgbToHsl(c: Rgb): Triple<Double, Double, Double> {
         val r = c.r / 255.0
@@ -137,15 +122,12 @@ object ColorConvert {
         )
     }
 
-    // -------------------------------------------------------------- OKLCH
-
     private fun srgbToLinear(v: Double): Double =
         if (v <= 0.04045) v / 12.92 else ((v + 0.055) / 1.055).pow(2.4)
 
     private fun linearToSrgb(v: Double): Double =
         if (v <= 0.0031308) v * 12.92 else 1.055 * v.pow(1 / 2.4) - 0.055
 
-    /** Devolve (L, C, H) com L em 0..1, C em torno de 0..0.4 e H em graus. */
     fun rgbToOklch(c: Rgb): Triple<Double, Double, Double> {
         val r = srgbToLinear(c.r / 255.0)
         val g = srgbToLinear(c.g / 255.0)

@@ -29,10 +29,6 @@ import javax.swing.SwingUtilities
 
 actual val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
-/**
- * `FileDialog` da AWT — o seletor **nativo** de cada SO, ao contrário do `JFileChooser`, que
- * desenha o dele em Swing e destoaria do resto do sistema.
- */
 actual suspend fun pickImageFile(): PickedFile? {
     val chosen = awaitFileDialog() ?: return null
     return chosen.asPickedFile()
@@ -40,7 +36,6 @@ actual suspend fun pickImageFile(): PickedFile? {
 
 private suspend fun awaitFileDialog(): File? {
     val result = CompletableDeferred<File?>()
-    // Diálogo modal tem de subir na EDT; `setVisible` só retorna quando o usuário fecha.
     SwingUtilities.invokeLater {
         runCatching {
             val dialog = FileDialog(null as Frame?, "Escolha uma imagem", FileDialog.LOAD)
@@ -69,7 +64,6 @@ actual fun Modifier.imageDropTarget(
             override fun onDrop(event: DragAndDropEvent): Boolean {
                 onDragStateChange(false)
                 val file = event.droppedFiles().firstOrNull { it.name.hasImageExtension() }
-                // Sem imagem na leva, devolve `false`: o SO mostra o cursor de "não pode".
                     ?: return false
                 onFileDropped(file.asPickedFile())
                 return true
@@ -100,12 +94,6 @@ private fun File.asPickedFile() = PickedFile(name) { withContext(Dispatchers.IO)
 private fun String.hasImageExtension(): Boolean =
     substringAfterLast('.', "").lowercase() in ImageFormat.allExtensions
 
-/**
- * Raster pela Skia e SVG pelo leitor do Compose.
- *
- * `makeFromEncoded` cobre PNG, JPEG, GIF, WebP, BMP e ICO, mas não entende SVG — que é texto,
- * não pixel, e precisa do rasterizador vetorial.
- */
 actual fun decodeImage(image: EncodedImage, density: Density): Painter? = runCatching {
     if (image.format == ImageFormat.Svg) {
         loadSvgPainter(image.bytes.inputStream(), density)

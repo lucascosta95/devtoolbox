@@ -1,11 +1,5 @@
 package dev.devtoolbox.core.util
 
-/**
- * Quebra um comando cURL em linhas legíveis.
- *
- * Tokeniza respeitando aspas simples e duplas (e escapes com `\`), depois reagrupa: a primeira
- * linha leva `curl` + método + URL, e cada flag seguinte ganha sua própria linha continuada.
- */
 object Curl {
 
     class ParseException(message: String) : Exception(message)
@@ -23,19 +17,16 @@ object Curl {
         while (i < tokens.size) {
             val token = tokens[i]
             when {
-                // Flags que carregam um valor no token seguinte.
                 token.startsWith("-") && takesValue(token) && i + 1 < tokens.size -> {
                     groups += listOf(token, tokens[i + 1])
                     i += 2
                 }
                 token.startsWith("-") -> { groups += listOf(token); i++ }
-                // Método e URL ficam na primeira linha, junto do `curl`.
                 head.size <= 3 && !token.startsWith("-") -> { head += token; i++ }
                 else -> { groups += listOf(token); i++ }
             }
         }
 
-        // -X POST costuma vir antes da URL; puxa para a primeira linha, como no protótipo.
         val method = groups.firstOrNull { it.size == 2 && (it[0] == "-X" || it[0] == "--request") }
         if (method != null) {
             groups.remove(method)
@@ -58,7 +49,6 @@ object Curl {
         "--connect-timeout", "-m", "--max-time", "--retry", "-w", "--write-out",
     )
 
-    /** Reaplica aspas em tokens que as perderam na tokenização. */
     private fun quoteIfNeeded(token: String): String = when {
         token.isEmpty() -> "''"
         token.none { it == ' ' || it == '"' || it == '\'' || it == '{' || it == '&' } -> token
@@ -81,7 +71,6 @@ object Curl {
                 quote != null && c == quote -> quote = null
                 quote != null -> current.append(c)
                 c == '"' || c == '\'' -> { quote = c; hasContent = true }
-                // Continuação de linha do shell.
                 c == '\\' && i + 1 < command.length && command[i + 1] == '\n' -> i++
                 c == '\\' && i + 1 < command.length -> { current.append(command[i + 1]); i++ }
                 c.isWhitespace() -> {
