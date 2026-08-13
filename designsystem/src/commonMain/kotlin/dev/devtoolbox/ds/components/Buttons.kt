@@ -102,6 +102,7 @@ fun GhostButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: String? = null,
+    iconSize: Dp = 13.dp,
     contentDescription: String? = null,
 ) = OutlinedButton(
     label = label,
@@ -116,7 +117,7 @@ fun GhostButton(
     accentBorder = false,
     contentColor = Nocturne.colors.text(0.7f),
     textStyle = Nocturne.type.tag,
-    iconSize = 13.dp,
+    iconSize = iconSize,
     contentPadding = PaddingValues(horizontal = Nocturne.space.xs, vertical = 4.dp),
 )
 

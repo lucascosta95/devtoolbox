@@ -3,16 +3,20 @@ package dev.devtoolbox.ds.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.Nocturne
 
@@ -32,9 +36,14 @@ fun Card(
 }
 
 @Composable
-fun CardKicker(text: String, modifier: Modifier = Modifier, trailing: @Composable (() -> Unit)? = null) {
+fun CardKicker(
+    text: String,
+    modifier: Modifier = Modifier,
+    trailingReserve: Dp = 0.dp,
+    trailing: @Composable (() -> Unit)? = null,
+) {
     Row(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -46,7 +55,14 @@ fun CardKicker(text: String, modifier: Modifier = Modifier, trailing: @Composabl
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        trailing?.invoke()
+        if (trailing != null) {
+            Box(
+                modifier = Modifier.widthIn(min = trailingReserve),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                trailing()
+            }
+        }
     }
 }
 

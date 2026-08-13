@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.core.Direction
+import dev.devtoolbox.core.Segment
 import dev.devtoolbox.core.Tool
 import dev.devtoolbox.core.ToolBody
 import dev.devtoolbox.core.ToolInput
@@ -47,13 +48,13 @@ fun ToolPane(
     Column(modifier.fillMaxWidth()) {
         ToolHeader(tool, favorite, onToggleFavorite)
 
+        val error = (output as? ToolOutput.Failure)?.message
         val body = when (output) {
             is ToolOutput.Success -> output.body
-            is ToolOutput.Failure -> output.body
+            is ToolOutput.Failure -> output.body ?: fallbackBody(tool.id, currentInput)
         }
 
-        val ownsItsInput = body is ToolBody.Io || body is ToolBody.Image
-        if (!ownsItsInput) {
+        if (!body.hostsItsInput()) {
             ToolInputEditor(
                 input = currentInput,
                 onChange = onInputChange,
@@ -62,15 +63,32 @@ fun ToolPane(
             )
         }
 
-        if (output is ToolOutput.Failure) {
-            ErrorMessage(output.message)
+        if (error != null && !body.hostsItsError()) {
+            ErrorMessage(error)
         }
 
-        when {
-            body != null -> ToolBodyContent(tool.id, body, currentInput, onInputChange)
-            else -> Unit
+        if (body != null) {
+            ToolBodyContent(tool.id, body, currentInput, error, onInputChange)
         }
     }
+}
+
+private fun ToolBody?.hostsItsInput(): Boolean =
+    this is ToolBody.Io || this is ToolBody.Image || this is ToolBody.Jwt || this is ToolBody.Regex
+
+private fun ToolBody?.hostsItsError(): Boolean = this is ToolBody.Jwt || this is ToolBody.Regex
+
+internal fun fallbackBody(toolId: String, input: ToolInput): ToolBody? = when {
+    toolId == "jwt" && input is ToolInput.Text -> ToolBody.Jwt("", "", "", "", "")
+
+    toolId == "regex" && input is ToolInput.Pattern -> ToolBody.Regex(
+        pattern = input.pattern,
+        flags = input.flags,
+        segments = listOf(Segment(input.subject, matched = false)),
+        matches = emptyList(),
+    )
+
+    else -> null
 }
 
 @Composable
@@ -140,6 +158,7 @@ private fun ToolBodyContent(
     toolId: String,
     body: ToolBody,
     currentInput: ToolInput,
+    error: String?,
     onInputChange: (ToolInput) -> Unit,
 ) {
     fun bumpSeed() {
@@ -157,10 +176,23 @@ private fun ToolBodyContent(
                 onInputChange(ToolInput.Text(text, direction))
             },
         )
-        is ToolBody.Jwt -> JwtLayout(body, toolId)
+        is ToolBody.Jwt -> JwtLayout(
+            body = body,
+            toolId = toolId,
+            token = (currentInput as? ToolInput.Text)?.value.orEmpty(),
+            error = error,
+            onTokenChange = { onInputChange(ToolInput.Text(it)) },
+        )
         is ToolBody.Rows -> RowsLayout(body, toolId, onRegenerate = ::bumpSeed)
         is ToolBody.Diff -> DiffLayout(body, toolId)
-        is ToolBody.Regex -> RegexLayout(body, toolId)
+        is ToolBody.Regex -> RegexLayout(
+            body = body,
+            toolId = toolId,
+            input = currentInput as? ToolInput.Pattern
+                ?: ToolInput.Pattern(body.pattern, body.flags, body.segments.joinToString("") { it.text }),
+            error = error,
+            onInputChange = onInputChange,
+        )
         is ToolBody.Validate ->
             ValidateLayout(
                 body = body,

@@ -3,6 +3,7 @@ package dev.devtoolbox.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -29,6 +29,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.core.persistence.NoOpStateStore
 import dev.devtoolbox.core.persistence.StateStore
@@ -42,13 +43,14 @@ import dev.devtoolbox.ds.components.IconButton
 import dev.devtoolbox.ds.components.LocalCopyFeedback
 import dev.devtoolbox.ds.components.PhosphorIcon
 import dev.devtoolbox.ds.components.Text
-
-private val CONTENT_MAX_WIDTH = 760.dp
+import dev.devtoolbox.ui.panels.LocalPanelStore
+import dev.devtoolbox.ui.panels.PanelStore
 
 @Composable
 fun App(
     initialState: AppState = AppState(),
     store: StateStore = NoOpStateStore,
+    panels: PanelStore = remember { PanelStore() },
 ) {
     val scope = rememberCoroutineScope()
     val viewModel = remember { AppViewModel(scope, initialState, store) }
@@ -62,10 +64,18 @@ fun App(
     LaunchedEffect(Unit) { runCatching { rootFocus.requestFocus() } }
 
     NocturneTheme(state.theme, state.accent) {
-        CompositionLocalProvider(LocalCopyFeedback provides copyFeedback) {
+        CompositionLocalProvider(
+            LocalCopyFeedback provides copyFeedback,
+            LocalPanelStore provides panels,
+        ) {
         Column(
             Modifier
                 .fillMaxSize()
+                .then(
+                    panels.dragCursor?.let {
+                        Modifier.pointerHoverIcon(it, overrideDescendants = true)
+                    } ?: Modifier,
+                )
                 .focusRequester(rootFocus)
                 .focusTarget()
                 .onPreviewKeyEvent { event ->
@@ -100,13 +110,16 @@ fun App(
                     onSearchFocusChange = { searchFocused = it },
                 )
 
-                Box(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 40.dp, vertical = 22.4.dp),
                 ) {
+                    val available = maxWidth
+                    LaunchedEffect(available) { panels.content.reportAvailable(available) }
+
                     ToolPane(
                         tool = state.selectedTool,
                         output = output,
@@ -114,7 +127,7 @@ fun App(
                         favorite = state.selectedId in state.favorites,
                         onToggleFavorite = { viewModel.toggleFavorite(state.selectedId) },
                         onInputChange = { viewModel.updateInput(state.selectedId, it) },
-                        modifier = Modifier.widthIn(max = CONTENT_MAX_WIDTH),
+                        modifier = Modifier.width(panels.content.width),
                     )
                 }
             }

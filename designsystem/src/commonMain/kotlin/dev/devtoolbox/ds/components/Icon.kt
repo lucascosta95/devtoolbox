@@ -21,7 +21,7 @@ object PhosphorIcons {
         "wrench" to Res.drawable.ph_wrench,
         "magnifying-glass" to Res.drawable.ph_magnifying_glass,
         "star" to Res.drawable.ph_star,
-        "clock-counter-clockwise" to Res.drawable.ph_clock_counter_clockwise,
+        "arrows-out-line-vertical" to Res.drawable.ph_arrows_out_line_vertical,
         "sun" to Res.drawable.ph_sun,
         "moon" to Res.drawable.ph_moon,
         "arrow-right" to Res.drawable.ph_arrow_right,

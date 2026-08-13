@@ -23,7 +23,7 @@ class IconCoverageTest {
     @Test
     fun chromeIconsAreMapped() {
         val chrome = listOf(
-            "wrench", "magnifying-glass", "star", "clock-counter-clockwise",
+            "wrench", "magnifying-glass", "star", "arrows-out-line-vertical",
             "sun", "moon", "arrow-right", "check", "copy", "x-circle", "drop-half", "image-square",
         )
         val missing = chrome.filterNot { it in PhosphorIcons.names }
