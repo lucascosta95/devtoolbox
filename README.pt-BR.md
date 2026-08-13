@@ -4,7 +4,7 @@
 
 # DevToolbox
 
-**23 ferramentas de desenvolvimento em um app desktop. Offline, instantâneo, sem telemetria.**
+**25 ferramentas de desenvolvimento em um app desktop. Offline, instantâneo, sem telemetria.**
 
 [![build](https://github.com/lucascosta95/devtoolbox/actions/workflows/build.yml/badge.svg)](https://github.com/lucascosta95/devtoolbox/actions/workflows/build.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)
@@ -32,8 +32,8 @@ para lugar nenhum, e as entradas que você digita nunca são gravadas em disco.
 | Categoria | Ferramentas | |
 |---|---|---|
 | **Encoding** | Base64 · JWT Decoder · URL Encode/Decode · Hash (MD5/SHA-1/SHA-256) · Imagem → Base64 | 5 |
-| **Formatters** | JSON · YAML · cURL · SQL · NRQL · Diff de texto e JSON | 6 |
-| **Text** | String Case (8 formatos) · Regex Tester · Lorem Ipsum | 3 |
+| **Formatters** | JSON · JSON String Parser · YAML · cURL · SQL · NRQL · Diff de texto e JSON | 7 |
+| **Text** | String Case (8 formatos) · Substring Tester · Regex Tester · Lorem Ipsum | 4 |
 | **Generators** | UUID v4 · Cores (HEX/RGB/HSL/OKLCH) · Timestamp · Cron · QR Code | 5 |
 | **Validators** | CPF · CNPJ · Telefone brasileiro · Cartão de crédito (Luhn) | 4 |
 
@@ -41,6 +41,10 @@ Tudo processa **entrada real**, com recálculo enquanto você digita e erro expl
 errado — não só "inválido":
 
 > `JSON inválido na linha 3, coluna 12: esperava ':' após a chave "b"`
+
+Todo painel é editável e redimensionável: clique em qualquer ponto do card para digitar, arraste a
+borda inferior para mudar a altura, a borda interna para mudar a proporção entre dois painéis e a
+borda direita para alargar a coluna de conteúdo.
 
 <div align="center">
 <img src="docs/screenshot-diff.png" width="410" alt="Diff">
@@ -151,7 +155,7 @@ Cada transformação e cada validador têm teste, sempre incluindo entradas inv�
 3. **release** apenas em tag `v*`, juntando os três instaladores
 
 ```bash
-git tag v1.3.0 && git push origin v1.3.0
+git tag v1.4.0 && git push origin v1.4.0
 ```
 
 ## Limitações conhecidas

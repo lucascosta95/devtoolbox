@@ -4,7 +4,7 @@
 
 # DevToolbox
 
-**23 developer tools in one desktop app. Offline, instant, no telemetry.**
+**25 developer tools in one desktop app. Offline, instant, no telemetry.**
 
 [![build](https://github.com/lucascosta95/devtoolbox/actions/workflows/build.yml/badge.svg)](https://github.com/lucascosta95/devtoolbox/actions/workflows/build.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)
@@ -32,8 +32,8 @@ anywhere, and the input you type is never written to disk.
 | Category | Tools | |
 |---|---|---|
 | **Encoding** | Base64 · JWT Decoder · URL Encode/Decode · Hash (MD5/SHA-1/SHA-256) · Image → Base64 | 5 |
-| **Formatters** | JSON · YAML · cURL · SQL · NRQL · Text and JSON diff | 6 |
-| **Text** | String Case (8 formats) · Regex Tester · Lorem Ipsum | 3 |
+| **Formatters** | JSON · JSON String Parser · YAML · cURL · SQL · NRQL · Text and JSON diff | 7 |
+| **Text** | String Case (8 formats) · Substring Tester · Regex Tester · Lorem Ipsum | 4 |
 | **Generators** | UUID v4 · Colors (HEX/RGB/HSL/OKLCH) · Timestamp · Cron · QR Code | 5 |
 | **Validators** | CPF · CNPJ · Brazilian phone number · Credit card (Luhn) | 4 |
 
@@ -41,6 +41,10 @@ Everything processes **real input**, recalculating as you type, with errors that
 wrong — not just "invalid":
 
 > `Invalid JSON at line 3, column 12: expected ':' after key "b"`
+
+Every panel is editable and resizable: click anywhere in a card to start typing, drag the bottom
+border to change the height, the inner border to change the split between two panels and the right
+border to widen the content column.
 
 <div align="center">
 <img src="docs/screenshot-diff.png" width="410" alt="Diff">
@@ -152,7 +156,7 @@ Every transformation and every validator has a test, always including invalid in
 3. **release** only on `v*` tags, bundling the three installers
 
 ```bash
-git tag v1.3.0 && git push origin v1.3.0
+git tag v1.4.0 && git push origin v1.4.0
 ```
 
 ## Known limitations
