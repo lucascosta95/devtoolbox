@@ -8,7 +8,6 @@ import kotlinx.serialization.json.Json
 data class PersistedState(
     @SerialName("selected_id") val selectedId: String? = null,
     val favorites: List<String> = emptyList(),
-    val recent: List<String> = emptyList(),
     val theme: String? = null,
     val accent: String? = null,
     val version: Int = 1,

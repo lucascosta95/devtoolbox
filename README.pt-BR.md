@@ -69,7 +69,7 @@ Todos trazem a JVM embutida — **não é preciso ter Java instalado**.
 | `Ctrl/Cmd` + `D` | Favorita a ferramenta ativa |
 | `Ctrl/Cmd` + `Shift` + `L` | Alterna claro/escuro |
 
-Favoritos, recentes, tema, cor de destaque e última ferramenta aberta são lembrados entre execuções
+Favoritos, tema, cor de destaque e última ferramenta aberta são lembrados entre execuções
 (`~/.config/devtoolbox` no Linux, `Application Support` no macOS, `%APPDATA%` no Windows).
 
 <div align="center">

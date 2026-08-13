@@ -10,28 +10,40 @@ import kotlin.test.assertEquals
 class NavigationTest {
 
     @Test
+    fun navigationStartsWithTheFavoritesThenTheCategories() = runTest {
+        val vm = AppViewModel(backgroundScope)
+        val order = vm.state.value.navigableTools.map { it.id }
+
+        assertEquals(listOf("base64", "json"), order.take(2))
+        assertEquals(ToolRegistry.all.size, order.size, "cada ferramenta aparece uma única vez")
+    }
+
+    @Test
     fun movingDownWalksTheSidebarOrder() = runTest {
         val vm = AppViewModel(backgroundScope)
-        assertEquals(ToolRegistry.all[0].id, vm.state.value.selectedId)
+        val order = vm.state.value.navigableTools.map { it.id }
+        assertEquals(order[0], vm.state.value.selectedId)
 
         vm.move(1)
-        assertEquals(ToolRegistry.all[1].id, vm.state.value.selectedId)
+        assertEquals(order[1], vm.state.value.selectedId)
 
         vm.move(1)
-        assertEquals(ToolRegistry.all[2].id, vm.state.value.selectedId)
+        assertEquals(order[2], vm.state.value.selectedId)
 
         vm.move(-1)
-        assertEquals(ToolRegistry.all[1].id, vm.state.value.selectedId)
+        assertEquals(order[1], vm.state.value.selectedId)
     }
 
     @Test
     fun movingStopsAtTheEdges() = runTest {
         val vm = AppViewModel(backgroundScope)
-        vm.move(-1)
-        assertEquals(ToolRegistry.all.first().id, vm.state.value.selectedId)
+        val order = vm.state.value.navigableTools
 
-        repeat(ToolRegistry.all.size + 5) { vm.move(1) }
-        assertEquals(ToolRegistry.all.last().id, vm.state.value.selectedId)
+        vm.move(-1)
+        assertEquals(order.first().id, vm.state.value.selectedId)
+
+        repeat(order.size + 5) { vm.move(1) }
+        assertEquals(order.last().id, vm.state.value.selectedId)
     }
 
     @Test
@@ -54,14 +66,6 @@ class NavigationTest {
         val before = vm.state.value.selectedId
         vm.move(1)
         assertEquals(before, vm.state.value.selectedId)
-    }
-
-    @Test
-    fun navigationFeedsTheRecentList() = runTest {
-        val vm = AppViewModel(backgroundScope)
-        vm.move(1)
-        vm.move(1)
-        assertEquals(listOf(ToolRegistry.all[2].id, ToolRegistry.all[1].id), vm.state.value.recent)
     }
 
     @Test

@@ -16,16 +16,6 @@ import kotlin.test.assertTrue
 class AppViewModelTest {
 
     @Test
-    fun selectingKeepsRecentDedupedAndCappedAtFive() = runTest {
-        val vm = AppViewModel(backgroundScope)
-        listOf("url", "json", "base64", "url", "json").forEach(vm::select)
-
-        val recent = vm.state.value.recent
-        assertEquals(listOf("json", "url", "base64"), recent)
-        assertTrue(recent.size <= MAX_RECENT)
-    }
-
-    @Test
     fun favoritesToggleBothWays() = runTest {
         val vm = AppViewModel(backgroundScope)
         assertTrue("base64" in vm.state.value.favorites)
@@ -46,15 +36,13 @@ class AppViewModelTest {
     }
 
     @Test
-    fun searchHidesFavoritesAndRecents() = runTest {
+    fun searchHidesFavorites() = runTest {
         val vm = AppViewModel(backgroundScope)
         vm.select("url")
         assertTrue(vm.state.value.favoriteTools.isNotEmpty())
-        assertTrue(vm.state.value.recentTools.isNotEmpty())
 
         vm.onQueryChange("json")
         assertTrue(vm.state.value.favoriteTools.isEmpty())
-        assertTrue(vm.state.value.recentTools.isEmpty())
         assertEquals(
             listOf("json", "diff"),
             vm.state.value.categories.flatMap { it.second }.map { it.id },

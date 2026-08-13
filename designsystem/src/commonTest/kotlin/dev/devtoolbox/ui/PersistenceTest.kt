@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -21,7 +22,6 @@ class PersistenceTest {
         val state = PersistedState(
             selectedId = "cron",
             favorites = listOf("base64", "json"),
-            recent = listOf("cron", "uuid"),
             theme = "light",
             accent = "teal",
         )
@@ -45,13 +45,11 @@ class PersistenceTest {
         val saved = PersistedState(
             selectedId = "cron",
             favorites = listOf("uuid"),
-            recent = listOf("cron"),
             theme = "light",
         )
         val state = AppState().mergedWith(saved)
         assertEquals("cron", state.selectedId)
         assertEquals(setOf("uuid"), state.favorites)
-        assertEquals(listOf("cron"), state.recent)
         assertEquals(ThemeMode.Light, state.theme)
     }
 
@@ -60,18 +58,34 @@ class PersistenceTest {
         val saved = PersistedState(
             selectedId = "ferramenta-removida",
             favorites = listOf("base64", "ferramenta-removida"),
-            recent = listOf("ferramenta-removida", "json"),
         )
         val state = AppState().mergedWith(saved)
         assertEquals(AppState().selectedId, state.selectedId)
         assertEquals(setOf("base64"), state.favorites)
-        assertEquals(listOf("json"), state.recent)
     }
 
     @Test
-    fun recentIsTruncatedToTheLimitWhenLoading() {
-        val saved = PersistedState(recent = listOf("base64", "json", "url", "uuid", "cron", "qr"))
-        assertEquals(MAX_RECENT, AppState().mergedWith(saved).recent.size)
+    fun aLegacyFileWithTheRecentKeyStillLoads() {
+        val legacy = """
+            {
+              "selected_id": "cron",
+              "favorites": ["base64"],
+              "recent": ["cron", "uuid"],
+              "theme": "light",
+              "accent": "teal",
+              "version": 1
+            }
+        """.trimIndent()
+
+        val decoded = StateCodec.decode(legacy)
+        assertNotNull(decoded, "state.json da 1.3.0 não pode quebrar o boot")
+        assertEquals("cron", decoded.selectedId)
+        assertEquals(listOf("base64"), decoded.favorites)
+
+        val state = AppState().mergedWith(decoded)
+        assertEquals("cron", state.selectedId)
+        assertEquals(ThemeMode.Light, state.theme)
+        assertEquals(AccentColor.Teal, state.accent)
     }
 
     @Test
@@ -88,7 +102,6 @@ class PersistenceTest {
         assertEquals("cron", saved.selectedId)
         assertTrue("cron" in saved.favorites)
         assertEquals("light", saved.theme)
-        assertEquals(listOf("cron"), saved.recent)
     }
 
     @Test

@@ -30,13 +30,10 @@ const val INPUT_DEBOUNCE_MS = 150L
 
 const val PERSIST_DEBOUNCE_MS = 500L
 
-const val MAX_RECENT = 5
-
 data class AppState(
     val query: String = "",
     val selectedId: String = ToolRegistry.default.id,
     val favorites: Set<String> = setOf("base64", "json"),
-    val recent: List<String> = emptyList(),
     val theme: ThemeMode = ThemeMode.Dark,
     val accent: AccentColor = AccentColor.default,
     val inputs: Map<String, ToolInput> = emptyMap(),
@@ -52,12 +49,10 @@ data class AppState(
     val favoriteTools: List<Tool>
         get() = if (isSearching) emptyList() else ToolRegistry.all.filter { it.id in favorites }
 
-    val recentTools: List<Tool>
-        get() = if (isSearching) emptyList() else recent.mapNotNull { ToolRegistry.byId(it) }
-
     val hasResults: Boolean get() = categories.isNotEmpty()
 
-    val navigableTools: List<Tool> get() = categories.flatMap { it.second }
+    val navigableTools: List<Tool>
+        get() = (favoriteTools + categories.flatMap { it.second }).distinct()
 }
 
 class AppViewModel(
@@ -101,12 +96,7 @@ class AppViewModel(
 
     fun clearQuery() = _state.update { it.copy(query = "") }
 
-    fun select(id: String) = _state.update { current ->
-        current.copy(
-            selectedId = id,
-            recent = (listOf(id) + current.recent.filterNot { it == id }).take(MAX_RECENT),
-        )
-    }
+    fun select(id: String) = _state.update { it.copy(selectedId = id) }
 
     fun move(delta: Int) {
         val tools = _state.value.navigableTools
@@ -141,7 +131,6 @@ class AppViewModel(
 fun AppState.persisted() = PersistedState(
     selectedId = selectedId,
     favorites = favorites.toList().sorted(),
-    recent = recent,
     theme = if (theme == ThemeMode.Dark) "dark" else "light",
     accent = accent.id,
 )
@@ -149,7 +138,6 @@ fun AppState.persisted() = PersistedState(
 fun AppState.mergedWith(saved: PersistedState): AppState = copy(
     selectedId = saved.selectedId?.takeIf { ToolRegistry.byId(it) != null } ?: selectedId,
     favorites = saved.favorites.filter { ToolRegistry.byId(it) != null }.toSet(),
-    recent = saved.recent.filter { ToolRegistry.byId(it) != null }.take(MAX_RECENT),
     theme = when (saved.theme) {
         "light" -> ThemeMode.Light
         "dark" -> ThemeMode.Dark

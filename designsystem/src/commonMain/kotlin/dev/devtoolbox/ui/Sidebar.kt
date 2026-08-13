@@ -72,11 +72,6 @@ fun Sidebar(
                             ToolList(state.favoriteTools, state, onSelect, onToggleFavorite)
                         }
 
-                        if (state.recentTools.isNotEmpty()) {
-                            SectionHeader("Recentes", icon = "clock-counter-clockwise")
-                            ToolList(state.recentTools, state, onSelect, onToggleFavorite)
-                        }
-
                         for ((category, tools) in state.categories) {
                             SectionHeader(category.label, icon = category.icon)
                             ToolList(tools, state, onSelect, onToggleFavorite)

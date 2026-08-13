@@ -69,7 +69,7 @@ All of them bundle the JVM — **no Java installation required**.
 | `Ctrl/Cmd` + `D` | Favorite the active tool |
 | `Ctrl/Cmd` + `Shift` + `L` | Toggle light/dark |
 
-Favorites, recents, theme, accent color and the last open tool are remembered across runs
+Favorites, theme, accent color and the last open tool are remembered across runs
 (`~/.config/devtoolbox` on Linux, `Application Support` on macOS, `%APPDATA%` on Windows).
 
 <div align="center">
