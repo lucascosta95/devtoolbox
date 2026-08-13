@@ -42,6 +42,17 @@ sealed interface ToolBody {
         val matches: List<MatchInfo>,
     ) : ToolBody
 
+    data class Substring(
+        val text: String,
+        val start: String,
+        val end: String,
+        val appliedStart: Int,
+        val appliedEnd: Int,
+        val length: Int,
+        val segments: List<Segment>,
+        val result: String,
+    ) : ToolBody
+
     data class Validate(
         val value: String,
         val valid: Boolean,

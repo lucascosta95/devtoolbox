@@ -15,19 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.devtoolbox.core.Segment
 import dev.devtoolbox.core.ToolBody
 import dev.devtoolbox.core.ToolInput
 import dev.devtoolbox.ds.Nocturne
@@ -42,6 +35,7 @@ import dev.devtoolbox.ui.panels.InputPanel
 import dev.devtoolbox.ui.panels.LocalPanelStore
 import dev.devtoolbox.ui.panels.PanelEdges
 import dev.devtoolbox.ui.panels.ResizableBlock
+import dev.devtoolbox.ui.panels.SegmentHighlight
 
 private val SUBJECT_HEIGHT = 120.dp
 
@@ -112,7 +106,7 @@ fun RegexLayout(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = "string de teste",
                 edges = PanelEdges(block = block, column = store.content),
-                visualTransformation = RegexHighlight(
+                visualTransformation = SegmentHighlight(
                     segments = body.segments,
                     matched = colors.onAccentSurface,
                     highlight = colors.accentSurface,
@@ -196,46 +190,6 @@ private fun InlineField(
             modifier = Modifier.width(width),
         )
     }
-}
-
-private class RegexHighlight(
-    private val segments: List<Segment>,
-    private val matched: Color,
-    private val highlight: Color,
-) : VisualTransformation {
-
-    override fun filter(text: AnnotatedString): TransformedText {
-        val raw = text.text
-        if (segments.joinToString("") { it.text } != raw) {
-            return TransformedText(AnnotatedString(raw), OffsetMapping.Identity)
-        }
-
-        val colored = buildAnnotatedString {
-            append(raw)
-            var cursor = 0
-            for (segment in segments) {
-                if (segment.matched) {
-                    addStyle(
-                        SpanStyle(color = matched, background = highlight),
-                        cursor,
-                        cursor + segment.text.length,
-                    )
-                }
-                cursor += segment.text.length
-            }
-        }
-
-        return TransformedText(colored, OffsetMapping.Identity)
-    }
-
-    override fun equals(other: Any?): Boolean =
-        other is RegexHighlight &&
-            other.segments == segments &&
-            other.matched == matched &&
-            other.highlight == highlight
-
-    override fun hashCode(): Int =
-        segments.hashCode() * 31 * 31 + matched.hashCode() * 31 + highlight.hashCode()
 }
 
 @Composable

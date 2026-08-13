@@ -118,7 +118,7 @@ changing a line.
 
 ```bash
 ./gradlew :app-desktop:run          # run the app
-./gradlew test                      # 281 tests
+./gradlew test                      # 306 tests
 ./gradlew :app-desktop:screenshot   # render every screen to PNG, no display needed
 ./gradlew :app-desktop:packageDeb   # installer for the current platform
 ```

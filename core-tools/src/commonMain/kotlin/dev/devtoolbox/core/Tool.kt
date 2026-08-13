@@ -16,6 +16,7 @@ sealed interface ToolInput {
     data class Text(val value: String, val direction: Direction = Direction.Auto) : ToolInput
     data class Pair(val left: String, val right: String) : ToolInput
     data class Pattern(val pattern: String, val flags: String, val subject: String) : ToolInput
+    data class Slice(val text: String, val start: String, val end: String) : ToolInput
     data class Seed(val nonce: Int) : ToolInput
 
     data class Image(val selection: ImageSelection = ImageSelection.Empty) : ToolInput

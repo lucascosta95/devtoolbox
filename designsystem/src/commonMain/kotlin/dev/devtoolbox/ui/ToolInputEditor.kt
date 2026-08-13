@@ -108,6 +108,6 @@ fun ToolInputEditor(
             }
         }
 
-        is ToolInput.Seed, is ToolInput.Image -> Unit
+        is ToolInput.Seed, is ToolInput.Image, is ToolInput.Slice -> Unit
     }
 }

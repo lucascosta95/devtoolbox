@@ -33,6 +33,7 @@ import dev.devtoolbox.ui.layouts.JwtLayout
 import dev.devtoolbox.ui.layouts.QrLayout
 import dev.devtoolbox.ui.layouts.RegexLayout
 import dev.devtoolbox.ui.layouts.RowsLayout
+import dev.devtoolbox.ui.layouts.SubstringLayout
 import dev.devtoolbox.ui.layouts.ValidateLayout
 
 @Composable
@@ -74,9 +75,11 @@ fun ToolPane(
 }
 
 private fun ToolBody?.hostsItsInput(): Boolean =
-    this is ToolBody.Io || this is ToolBody.Image || this is ToolBody.Jwt || this is ToolBody.Regex
+    this is ToolBody.Io || this is ToolBody.Image || this is ToolBody.Jwt ||
+        this is ToolBody.Regex || this is ToolBody.Substring
 
-private fun ToolBody?.hostsItsError(): Boolean = this is ToolBody.Jwt || this is ToolBody.Regex
+private fun ToolBody?.hostsItsError(): Boolean =
+    this is ToolBody.Jwt || this is ToolBody.Regex || this is ToolBody.Io
 
 internal fun fallbackBody(toolId: String, input: ToolInput): ToolBody? = when {
     toolId == "jwt" && input is ToolInput.Text -> ToolBody.Jwt("", "", "", "", "")
@@ -191,6 +194,13 @@ private fun ToolBodyContent(
             input = currentInput as? ToolInput.Pattern
                 ?: ToolInput.Pattern(body.pattern, body.flags, body.segments.joinToString("") { it.text }),
             error = error,
+            onInputChange = onInputChange,
+        )
+        is ToolBody.Substring -> SubstringLayout(
+            body = body,
+            toolId = toolId,
+            input = currentInput as? ToolInput.Slice
+                ?: ToolInput.Slice(body.text, body.start, body.end),
             onInputChange = onInputChange,
         )
         is ToolBody.Validate ->

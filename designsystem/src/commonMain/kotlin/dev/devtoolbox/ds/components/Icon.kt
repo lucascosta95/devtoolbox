@@ -43,6 +43,8 @@ object PhosphorIcons {
         "chart-line" to Res.drawable.ph_chart_line,
         "arrows-split" to Res.drawable.ph_arrows_split,
         "paragraph" to Res.drawable.ph_paragraph,
+        "quotes" to Res.drawable.ph_quotes,
+        "selection" to Res.drawable.ph_selection,
         "identification-badge" to Res.drawable.ph_identification_badge,
         "palette" to Res.drawable.ph_palette,
         "clock-countdown" to Res.drawable.ph_clock_countdown,

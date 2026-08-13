@@ -118,7 +118,7 @@ prontos para Android, iOS ou Wasm sem mudar uma linha.
 
 ```bash
 ./gradlew :app-desktop:run          # roda o app
-./gradlew test                      # 281 testes
+./gradlew test                      # 306 testes
 ./gradlew :app-desktop:screenshot   # renderiza cada tela em PNG, sem abrir display
 ./gradlew :app-desktop:packageDeb   # instalador da plataforma atual
 ```

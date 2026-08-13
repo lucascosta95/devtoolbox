@@ -8,6 +8,7 @@ import dev.devtoolbox.core.Tool
 import dev.devtoolbox.core.ToolBody
 import dev.devtoolbox.core.ToolInput
 import dev.devtoolbox.core.ToolOutput
+import dev.devtoolbox.core.util.CodePoints
 import dev.devtoolbox.core.util.Lorem
 import dev.devtoolbox.core.util.StringCase
 
@@ -111,6 +112,56 @@ object LoremTool : Tool {
             ToolBody.Rows(
                 rows = paragraphs.mapIndexed { i, p -> Row("Parágrafo ${i + 1}", p) },
                 regenerable = true,
+            ),
+        )
+    }
+}
+
+object SubstringTool : Tool {
+    override val id = "substring"
+    override val name = "Substring Tester"
+    override val category = Category.Text
+    override val icon = "selection"
+    override val description =
+        "Recorte um trecho de uma string por índice inicial e final e veja o resultado destacado."
+    override val defaultInput = ToolInput.Slice(
+        text = "https://devtoolbox.dev/tools?id=substring",
+        start = "8",
+        end = "22",
+    )
+
+    override fun run(input: ToolInput): ToolOutput {
+        val slice = input as? ToolInput.Slice ?: return ToolOutput.Failure("Entrada inválida.")
+
+        val points = CodePoints.split(slice.text)
+        val length = points.size
+        val start = (slice.start.trim().toIntOrNull() ?: 0).coerceIn(0, length)
+        val end = if (slice.end.isBlank()) {
+            length
+        } else {
+            (slice.end.trim().toIntOrNull() ?: 0).coerceIn(start, length)
+        }
+
+        val before = points.subList(0, start).joinToString("")
+        val selected = points.subList(start, end).joinToString("")
+        val after = points.subList(end, length).joinToString("")
+
+        val segments = buildList {
+            if (before.isNotEmpty()) add(Segment(before, matched = false))
+            if (selected.isNotEmpty()) add(Segment(selected, matched = true))
+            if (after.isNotEmpty()) add(Segment(after, matched = false))
+        }
+
+        return ToolOutput.Success(
+            ToolBody.Substring(
+                text = slice.text,
+                start = slice.start,
+                end = slice.end,
+                appliedStart = start,
+                appliedEnd = end,
+                length = length,
+                segments = segments,
+                result = selected,
             ),
         )
     }

@@ -44,7 +44,7 @@ class AppViewModelTest {
         vm.onQueryChange("json")
         assertTrue(vm.state.value.favoriteTools.isEmpty())
         assertEquals(
-            listOf("json", "diff"),
+            listOf("json", "json-string", "diff"),
             vm.state.value.categories.flatMap { it.second }.map { it.id },
         )
     }

@@ -11,6 +11,7 @@ import dev.devtoolbox.core.tools.DiffTool
 import dev.devtoolbox.core.tools.HashTool
 import dev.devtoolbox.core.tools.ImageBase64Tool
 import dev.devtoolbox.core.tools.JsonFormatterTool
+import dev.devtoolbox.core.tools.JsonStringParserTool
 import dev.devtoolbox.core.tools.JwtTool
 import dev.devtoolbox.core.tools.LoremTool
 import dev.devtoolbox.core.tools.NrqlFormatterTool
@@ -19,6 +20,7 @@ import dev.devtoolbox.core.tools.QrTool
 import dev.devtoolbox.core.tools.RegexTool
 import dev.devtoolbox.core.tools.SqlFormatterTool
 import dev.devtoolbox.core.tools.StringCaseTool
+import dev.devtoolbox.core.tools.SubstringTool
 import dev.devtoolbox.core.tools.TimestampTool
 import dev.devtoolbox.core.tools.UrlTool
 import dev.devtoolbox.core.tools.UuidTool
@@ -33,12 +35,14 @@ object ToolRegistry {
         HashTool,
         ImageBase64Tool,
         JsonFormatterTool,
+        JsonStringParserTool,
         YamlFormatterTool,
         CurlFormatterTool,
         SqlFormatterTool,
         NrqlFormatterTool,
         DiffTool,
         StringCaseTool,
+        SubstringTool,
         RegexTool,
         LoremTool,
         UuidTool,

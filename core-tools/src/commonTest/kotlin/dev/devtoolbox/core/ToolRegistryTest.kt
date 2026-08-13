@@ -80,8 +80,16 @@ class ToolRegistryTest {
     @Test
     fun formattersKeepTheSidebarOrder() {
         assertEquals(
-            listOf("json", "yaml", "curl", "sql", "nrql", "diff"),
+            listOf("json", "json-string", "yaml", "curl", "sql", "nrql", "diff"),
             ToolRegistry.all.filter { it.category == Category.Formatters }.map { it.id },
+        )
+    }
+
+    @Test
+    fun textToolsKeepTheSidebarOrder() {
+        assertEquals(
+            listOf("string-case", "substring", "regex", "lorem"),
+            ToolRegistry.all.filter { it.category == Category.Text }.map { it.id },
         )
     }
 

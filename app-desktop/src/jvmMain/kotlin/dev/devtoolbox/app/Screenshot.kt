@@ -51,6 +51,16 @@ fun main(args: Array<String>) {
             selectedId = "cron",
             inputs = mapOf("cron" to ToolInput.Text("0 9 L * *")),
         ),
+        "erro-json-string" to AppState(
+            selectedId = "json-string",
+            inputs = mapOf("json-string" to ToolInput.Text("\"{\\\"a\\\" 1}\"")),
+        ),
+        "substring-vazio" to AppState(
+            selectedId = "substring",
+            inputs = mapOf(
+                "substring" to ToolInput.Slice("DevToolbox", "6", "2"),
+            ),
+        ),
     ).map { (name, state) -> Shot(name, state) } + listOf(
         Shot(
             name = "painel-redimensionado",
