@@ -78,6 +78,22 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y fakeroot
 
+      # Sem WIX_PATH o plugin do Compose baixa o WiX3 do GitHub Releases em toda
+      # execução (tarefa `:downloadWix`), e essa rede falha de vez em quando. A imagem
+      # do runner já traz o WiX 3.14, então apontamos para ele e o download é pulado.
+      # Se algum dia sumir da imagem, seguimos sem a variável e o plugin baixa como antes.
+      - name: Usar o WiX pré-instalado
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $bin = if ($env:WIX) { Join-Path $env:WIX 'bin' } else { '' }
+          if ($bin -and (Test-Path (Join-Path $bin 'candle.exe'))) {
+            "WIX_PATH=$bin" | Out-File -FilePath $env:GITHUB_ENV -Append
+            Write-Host "WiX pré-instalado: $bin"
+          } else {
+            Write-Host "WiX ausente na imagem; o plugin do Compose fará o download."
+          }
+
       # Os ícones são gerados pela tarefa `appIcon`, da qual o empacotamento já depende —
       # não são versionados como binários, para não saírem de sincronia com o design system.
       - name: Empacotar
