@@ -159,7 +159,7 @@ Cada transformação e cada validador têm teste, sempre incluindo entradas inv�
 3. **release** apenas em tag `v*`, juntando os três instaladores
 
 ```bash
-git tag v1.4.0 && git push origin v1.4.0
+git tag v1.5.0 && git push origin v1.5.0
 ```
 
 ## Limitações conhecidas

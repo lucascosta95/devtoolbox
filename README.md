@@ -160,7 +160,7 @@ Every transformation and every validator has a test, always including invalid in
 3. **release** only on `v*` tags, bundling the three installers
 
 ```bash
-git tag v1.4.0 && git push origin v1.4.0
+git tag v1.5.0 && git push origin v1.5.0
 ```
 
 ## Known limitations
