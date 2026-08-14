@@ -25,7 +25,10 @@ You open one random website to decode a JWT, another to format JSON, a third to 
 document number — and paste work data into servers you know nothing about.
 
 DevToolbox does all of that **on your machine**. No tool touches the network, nothing is sent
-anywhere, and the input you type is never written to disk.
+anywhere, and the input you type is never written to disk. The app makes exactly one request in
+its whole life: a plain `GET` to the GitHub releases API at startup, to find out whether a newer
+version exists. It carries nothing about you — no identifier, no usage data — and nothing else
+ever leaves the machine.
 
 ## The tools
 
@@ -77,7 +80,8 @@ Clicking the version in the sidebar footer checks on the spot. Offline, the chec
 | `Ctrl/Cmd` + `D` | Favorite the active tool |
 | `Ctrl/Cmd` + `Shift` + `L` | Toggle light/dark |
 
-Favorites, theme, accent color and the last open tool are remembered across runs
+Favorites, theme, accent color, the last open tool and a skipped update version are remembered
+across runs
 (`~/.config/devtoolbox` on Linux, `Application Support` on macOS, `%APPDATA%` on Windows).
 
 <div align="center">
@@ -115,12 +119,18 @@ the interface already knows how to draw any new tool without a line of UI code.
 
 **Adding a tool:** one class, one line in `ToolRegistry`, one test.
 
+The update check obeys the same rule: comparing versions and reading the release payload are pure
+functions in `:core-tools`, while the HTTP call and "open in the browser" sit behind an
+`expect/actual` in `:designsystem`, next to the state store. The dialog is fed by state, so it
+renders in the headless screenshots like any other screen.
+
 ### Zero dependencies in the core
 
 `:core-tools` has no runtime dependencies. MD5, SHA-1, SHA-256, Base64, percent-encoding, JSON,
 a YAML subset, cron, OKLCH conversion, the Luhn algorithm, image header parsing and the QR Code
 encoder are implemented in the project — in `commonMain`, ready for Android, iOS or Wasm without
-changing a line.
+changing a line. The update check added none either: it uses the HTTP client that ships with the
+JDK.
 
 ## Development
 
@@ -171,6 +181,8 @@ git tag v1.5.0 && git push origin v1.5.0
 - **Cron** accepts 5 fields with `*`, number, range, step and list — no `L`, `W`, `#` or `@daily`
 - **QR Code** in byte mode, error correction level M, versions 1–10 (up to 213 bytes)
 - **Image → Base64** accepts up to 5 MB, in PNG, JPG, GIF, WebP, BMP, ICO and SVG
+- **Update check** runs once per launch against the unauthenticated GitHub API (60 requests per
+  hour per IP). It never retries, and any failure — offline, timeout, rate limit — is silent
 - The installers are **not signed**
 
 ## Credits

@@ -25,7 +25,10 @@ Você abre um site aleatório para decodificar um JWT, outro para formatar JSON,
 validar um CPF — e cola dados de trabalho em servidores que não conhece.
 
 O DevToolbox faz tudo isso **na sua máquina**. Nenhuma ferramenta acessa a rede, nada é enviado
-para lugar nenhum, e as entradas que você digita nunca são gravadas em disco.
+para lugar nenhum, e as entradas que você digita nunca são gravadas em disco. O app faz exatamente
+uma requisição em toda a sua vida: um `GET` simples na API de releases do GitHub ao abrir, para
+saber se existe versão mais nova. Ela não leva nada sobre você — nenhum identificador, nenhum
+dado de uso — e nada mais sai da máquina.
 
 ## As ferramentas
 
@@ -77,7 +80,8 @@ Clicar na versão no rodapé da barra lateral checa na hora. Sem internet, a che
 | `Ctrl/Cmd` + `D` | Favorita a ferramenta ativa |
 | `Ctrl/Cmd` + `Shift` + `L` | Alterna claro/escuro |
 
-Favoritos, tema, cor de destaque e última ferramenta aberta são lembrados entre execuções
+Favoritos, tema, cor de destaque, última ferramenta aberta e a versão pulada no aviso de
+atualização são lembrados entre execuções
 (`~/.config/devtoolbox` no Linux, `Application Support` no macOS, `%APPDATA%` no Windows).
 
 <div align="center">
@@ -115,12 +119,18 @@ desenhar qualquer ferramenta nova sem uma linha de código de UI.
 
 **Adicionar uma ferramenta:** uma classe, uma linha no `ToolRegistry`, um teste.
 
+A checagem de atualização obedece à mesma regra: comparar versões e ler o payload da release são
+funções puras em `:core-tools`, enquanto a chamada HTTP e o "abrir no navegador" ficam atrás de um
+`expect/actual` no `:designsystem`, ao lado do store de estado. O dialog é alimentado por estado,
+então aparece nos screenshots headless como qualquer outra tela.
+
 ### Zero dependências no core
 
 `:core-tools` não tem nenhuma dependência de runtime. MD5, SHA-1, SHA-256, Base64,
 percent-encoding, JSON, um subset de YAML, cron, conversão OKLCH, o algoritmo de Luhn, a leitura
 de cabeçalho de imagem e o encoder de QR Code são implementados no projeto — em `commonMain`,
-prontos para Android, iOS ou Wasm sem mudar uma linha.
+prontos para Android, iOS ou Wasm sem mudar uma linha. A checagem de atualização também não trouxe
+nenhuma: usa o cliente HTTP que já vem na JDK.
 
 ## Desenvolvimento
 
@@ -170,6 +180,8 @@ git tag v1.5.0 && git push origin v1.5.0
 - **Cron** aceita 5 campos com `*`, número, intervalo, passo e lista — sem `L`, `W`, `#` ou `@daily`
 - **QR Code** em modo byte, correção nível M, versões 1–10 (até 213 bytes)
 - **Imagem → Base64** aceita até 5 MB, em PNG, JPG, GIF, WebP, BMP, ICO e SVG
+- **Checagem de atualização** roda uma vez por abertura, na API pública do GitHub (60 requisições
+  por hora por IP). Não tenta de novo, e qualquer falha — sem rede, timeout, limite — é silenciosa
 - Os instaladores **não são assinados**
 
 ## Créditos
