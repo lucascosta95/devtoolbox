@@ -125,7 +125,7 @@ fun main(args: Array<String>) {
 
 private class Shot(val name: String, val state: AppState, val panels: PanelStore = PanelStore())
 
-private fun sampleImage(alpha: Boolean = false): dev.devtoolbox.core.ImageSelection {
+internal fun sampleImage(alpha: Boolean = false): dev.devtoolbox.core.ImageSelection {
     val image = java.awt.image.BufferedImage(320, 200, java.awt.image.BufferedImage.TYPE_INT_ARGB)
     val g = image.createGraphics()
     if (alpha) {
