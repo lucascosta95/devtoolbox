@@ -32,6 +32,14 @@ tasks.register<JavaExec>("screenshot") {
     dependsOn("jvmMainClasses")
 }
 
+tasks.register<JavaExec>("demoFrames") {
+    group = "verification"
+    description = "Renderiza os quadros do vídeo de demonstração em build/demo"
+    classpath = jvmMainRuntime
+    mainClass.set("dev.devtoolbox.app.DemoKt")
+    dependsOn("jvmMainClasses")
+}
+
 tasks.register<JavaExec>("appIcon") {
     group = "build"
     description = "Gera src/jvmMain/resources/icons/devtoolbox.png"
@@ -48,6 +56,7 @@ compose.desktop.application {
 
     nativeDistributions {
         targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+        modules("java.instrument", "java.net.http", "jdk.unsupported")
         packageName = "DevToolbox"
         packageVersion = providers.gradleProperty("devtoolbox.version").get()
         description = "Caixa de ferramentas para desenvolvedores"
