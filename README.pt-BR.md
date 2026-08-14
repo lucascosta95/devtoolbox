@@ -63,6 +63,10 @@ Baixe o instalador da sua plataforma em **[Releases](https://github.com/lucascos
 
 Todos trazem a JVM embutida — **não é preciso ter Java instalado**.
 
+Ao abrir, o app pergunta ao GitHub se existe uma release mais nova e, se existir, oferece abri-la.
+Dá para adiar o aviso ou pular aquela versão — uma release posterior volta a avisar sozinha.
+Clicar na versão no rodapé da barra lateral checa na hora. Sem internet, a checagem falha em silêncio.
+
 ## Atalhos
 
 | | |
@@ -122,7 +126,7 @@ prontos para Android, iOS ou Wasm sem mudar uma linha.
 
 ```bash
 ./gradlew :app-desktop:run          # roda o app
-./gradlew test                      # 306 testes
+./gradlew allTests                  # 339 testes
 ./gradlew :app-desktop:screenshot   # renderiza cada tela em PNG, sem abrir display
 ./gradlew :app-desktop:packageDeb   # instalador da plataforma atual
 ```

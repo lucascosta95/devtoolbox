@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -18,11 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.core.BuildInfo
 import dev.devtoolbox.core.Tool
 import dev.devtoolbox.ds.Nocturne
+import dev.devtoolbox.ds.components.OutlinedButton
 import dev.devtoolbox.ds.components.PhosphorIcon
 import dev.devtoolbox.ds.components.SectionHeader
 import dev.devtoolbox.ds.components.SidebarItem
@@ -41,6 +45,7 @@ fun Sidebar(
     onToggleFavorite: (String) -> Unit,
     searchFocusRequester: FocusRequester,
     onSearchFocusChange: (Boolean) -> Unit = {},
+    onCheckForUpdates: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Box(modifier.width(SIDEBAR_WIDTH).fillMaxHeight().background(Nocturne.colors.surface)) {
@@ -91,7 +96,7 @@ fun Sidebar(
                         }
                     }
 
-                    SidebarFooter()
+                    SidebarFooter(onCheckForUpdates)
                 }
             }
         }
@@ -124,7 +129,7 @@ private fun ToolList(
 }
 
 @Composable
-private fun SidebarFooter() {
+private fun SidebarFooter(onCheckForUpdates: () -> Unit) {
     val colors = Nocturne.colors
     Column(Modifier.fillMaxWidth()) {
         Box(Modifier.fillMaxWidth().height(1.dp).background(colors.divider))
@@ -133,7 +138,7 @@ private fun SidebarFooter() {
                 .fillMaxWidth()
                 .padding(
                     start = Nocturne.space.lg,
-                    end = Nocturne.space.lg,
+                    end = Nocturne.space.lg - Nocturne.space.xs,
                     top = Nocturne.space.md,
                     bottom = Nocturne.space.lg,
                 ),
@@ -147,7 +152,16 @@ private fun SidebarFooter() {
                 PhosphorIcon("wrench", size = 12.dp, tint = colors.text(0.45f))
                 Text("DevToolbox", style = Nocturne.type.tag, color = colors.text(0.45f))
             }
-            Text(BuildInfo.displayVersion, style = Nocturne.type.tag, color = colors.text(0.45f))
+            OutlinedButton(
+                label = BuildInfo.displayVersion,
+                onClick = onCheckForUpdates,
+                modifier = Modifier.semantics { contentDescription = "Procurar atualizações" },
+                bordered = false,
+                accentBorder = false,
+                contentColor = colors.text(0.45f),
+                textStyle = Nocturne.type.tag,
+                contentPadding = PaddingValues(horizontal = Nocturne.space.xs, vertical = 4.dp),
+            )
         }
     }
 }

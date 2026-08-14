@@ -33,6 +33,8 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.core.persistence.NoOpStateStore
 import dev.devtoolbox.core.persistence.StateStore
+import dev.devtoolbox.core.update.NoOpReleaseFetcher
+import dev.devtoolbox.core.update.ReleaseFetcher
 import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.NocturneTheme
@@ -51,9 +53,10 @@ fun App(
     initialState: AppState = AppState(),
     store: StateStore = NoOpStateStore,
     panels: PanelStore = remember { PanelStore() },
+    releases: ReleaseFetcher = NoOpReleaseFetcher,
 ) {
     val scope = rememberCoroutineScope()
-    val viewModel = remember { AppViewModel(scope, initialState, store) }
+    val viewModel = remember { AppViewModel(scope, initialState, store, releases) }
     val state by viewModel.state.collectAsState()
     val output by viewModel.output.collectAsState()
     val searchFocus = remember { FocusRequester() }
@@ -61,7 +64,10 @@ fun App(
     var searchFocused by remember { mutableStateOf(false) }
     val copyFeedback = remember { CopyFeedbackState() }
 
-    LaunchedEffect(Unit) { runCatching { rootFocus.requestFocus() } }
+    LaunchedEffect(Unit) {
+        runCatching { rootFocus.requestFocus() }
+        viewModel.checkForUpdates()
+    }
 
     NocturneTheme(state.theme, state.accent) {
         CompositionLocalProvider(
@@ -108,6 +114,7 @@ fun App(
                     onToggleFavorite = viewModel::toggleFavorite,
                     searchFocusRequester = searchFocus,
                     onSearchFocusChange = { searchFocused = it },
+                    onCheckForUpdates = viewModel::checkForUpdatesManually,
                 )
 
                 BoxWithConstraints(
@@ -131,6 +138,24 @@ fun App(
                     )
                 }
             }
+        }
+
+        state.updateNotice?.let { notice ->
+            UpdateDialog(
+                notice = notice,
+                onOpenRelease = {
+                    viewModel.openRelease(it)
+                    runCatching { rootFocus.requestFocus() }
+                },
+                onRemindLater = {
+                    viewModel.dismissUpdate()
+                    runCatching { rootFocus.requestFocus() }
+                },
+                onSkipVersion = {
+                    viewModel.skipVersion(it)
+                    runCatching { rootFocus.requestFocus() }
+                },
+            )
         }
         }
     }

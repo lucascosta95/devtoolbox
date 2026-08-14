@@ -5,9 +5,11 @@ import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
 import dev.devtoolbox.core.ToolInput
 import dev.devtoolbox.core.ToolRegistry
+import dev.devtoolbox.core.update.Release
 import dev.devtoolbox.ds.ThemeMode
 import dev.devtoolbox.ui.App
 import dev.devtoolbox.ui.AppState
+import dev.devtoolbox.ui.UpdateNotice
 import dev.devtoolbox.ui.panels.MIN_IO_PANEL_HEIGHT
 import dev.devtoolbox.ui.panels.PanelStore
 import androidx.compose.ui.unit.dp
@@ -33,6 +35,20 @@ fun main(args: Array<String>) {
             inputs = mapOf("img64" to dev.devtoolbox.core.ToolInput.Image(sampleImage(alpha = true))),
         ),
         "busca-vazia" to AppState(query = "zzz"),
+        "atualizacao-disponivel" to AppState(
+            selectedId = "json",
+            updateNotice = UpdateNotice.Available(
+                Release(
+                    tag = "v1.5.0",
+                    url = "https://github.com/lucascosta95/devtoolbox/releases/tag/v1.5.0",
+                ),
+            ),
+        ),
+        "atualizacao-em-dia" to AppState(
+            selectedId = "json",
+            theme = ThemeMode.Light,
+            updateNotice = UpdateNotice.UpToDate,
+        ),
         "accent-teal" to AppState(selectedId = "card", accent = dev.devtoolbox.ds.AccentColor.Teal),
         "accent-amber-light" to AppState(
             selectedId = "regex",

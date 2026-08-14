@@ -10,6 +10,7 @@ data class PersistedState(
     val favorites: List<String> = emptyList(),
     val theme: String? = null,
     val accent: String? = null,
+    @SerialName("update_skipped_version") val skippedVersion: String? = null,
     val version: Int = 1,
 )
 

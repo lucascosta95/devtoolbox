@@ -1,5 +1,6 @@
 package dev.devtoolbox.ui
 
+import dev.devtoolbox.core.BuildInfo
 import dev.devtoolbox.core.Category
 import dev.devtoolbox.core.Tool
 import dev.devtoolbox.core.ToolInput
@@ -8,8 +9,14 @@ import dev.devtoolbox.core.ToolRegistry
 import dev.devtoolbox.core.persistence.NoOpStateStore
 import dev.devtoolbox.core.persistence.PersistedState
 import dev.devtoolbox.core.persistence.StateStore
+import dev.devtoolbox.core.update.GitHubReleases
+import dev.devtoolbox.core.update.NoOpReleaseFetcher
+import dev.devtoolbox.core.update.Release
+import dev.devtoolbox.core.update.ReleaseFetcher
+import dev.devtoolbox.core.update.pendingUpdate
 import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.ThemeMode
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -25,10 +32,16 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 const val INPUT_DEBOUNCE_MS = 150L
 
 const val PERSIST_DEBOUNCE_MS = 500L
+
+sealed interface UpdateNotice {
+    data class Available(val release: Release) : UpdateNotice
+    data object UpToDate : UpdateNotice
+}
 
 data class AppState(
     val query: String = "",
@@ -37,6 +50,8 @@ data class AppState(
     val theme: ThemeMode = ThemeMode.Dark,
     val accent: AccentColor = AccentColor.default,
     val inputs: Map<String, ToolInput> = emptyMap(),
+    val skippedVersion: String? = null,
+    val updateNotice: UpdateNotice? = null,
 ) {
     val selectedTool: Tool get() = ToolRegistry.byId(selectedId) ?: ToolRegistry.default
 
@@ -59,6 +74,8 @@ class AppViewModel(
     private val scope: CoroutineScope,
     initialState: AppState = AppState(),
     private val store: StateStore = NoOpStateStore,
+    private val releases: ReleaseFetcher = NoOpReleaseFetcher,
+    private val openUrl: (String) -> Unit = ::openInBrowser,
 ) {
 
     private val _state = MutableStateFlow(store.load()?.let(initialState::mergedWith) ?: initialState)
@@ -121,6 +138,45 @@ class AppViewModel(
 
     fun selectAccent(accent: AccentColor) = _state.update { it.copy(accent = accent) }
 
+    fun checkForUpdates() {
+        scope.launch { showUpdate(latestRelease(), silentWhenUpToDate = true) }
+    }
+
+    fun checkForUpdatesManually() {
+        _state.update { it.copy(skippedVersion = null) }
+        scope.launch { showUpdate(latestRelease(), silentWhenUpToDate = false) }
+    }
+
+    private suspend fun latestRelease(): Release? = try {
+        releases.latest()
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (failure: Throwable) {
+        null
+    }
+
+    private fun showUpdate(release: Release?, silentWhenUpToDate: Boolean) = _state.update { current ->
+        val update = pendingUpdate(BuildInfo.VERSION, release, current.skippedVersion)
+        current.copy(
+            updateNotice = when {
+                update != null -> UpdateNotice.Available(update)
+                silentWhenUpToDate -> current.updateNotice
+                else -> UpdateNotice.UpToDate
+            },
+        )
+    }
+
+    fun openRelease(release: Release) {
+        openUrl(release.url.ifBlank { GitHubReleases.latestPageUrl(BuildInfo.REPO) })
+        dismissUpdate()
+    }
+
+    fun dismissUpdate() = _state.update { it.copy(updateNotice = null) }
+
+    fun skipVersion(release: Release) = _state.update {
+        it.copy(updateNotice = null, skippedVersion = release.version?.toString() ?: release.tag)
+    }
+
     fun updateInput(id: String, input: ToolInput) = _state.update {
         it.copy(inputs = it.inputs + (id to input))
     }
@@ -133,6 +189,7 @@ fun AppState.persisted() = PersistedState(
     favorites = favorites.toList().sorted(),
     theme = if (theme == ThemeMode.Dark) "dark" else "light",
     accent = accent.id,
+    skippedVersion = skippedVersion,
 )
 
 fun AppState.mergedWith(saved: PersistedState): AppState = copy(
@@ -144,4 +201,5 @@ fun AppState.mergedWith(saved: PersistedState): AppState = copy(
         else -> theme
     },
     accent = AccentColor.byId(saved.accent) ?: accent,
+    skippedVersion = saved.skippedVersion,
 )

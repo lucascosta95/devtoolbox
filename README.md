@@ -63,6 +63,10 @@ Download the installer for your platform from **[Releases](https://github.com/lu
 
 All of them bundle the JVM — **no Java installation required**.
 
+On startup the app asks GitHub whether a newer release exists and, if so, offers to open it.
+You can postpone the notice or skip that version — a later release brings it back on its own.
+Clicking the version in the sidebar footer checks on the spot. Offline, the check fails silently.
+
 ## Shortcuts
 
 | | |
@@ -122,7 +126,7 @@ changing a line.
 
 ```bash
 ./gradlew :app-desktop:run          # run the app
-./gradlew test                      # 306 tests
+./gradlew allTests                  # 339 tests
 ./gradlew :app-desktop:screenshot   # render every screen to PNG, no display needed
 ./gradlew :app-desktop:packageDeb   # installer for the current platform
 ```

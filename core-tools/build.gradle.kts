@@ -4,10 +4,12 @@ plugins {
 }
 
 val appVersion: String = providers.gradleProperty("devtoolbox.version").get()
+val appRepo: String = providers.gradleProperty("devtoolbox.repo").get()
 
 val generateBuildInfo = tasks.register("generateBuildInfo") {
     val outputDir = layout.buildDirectory.dir("generated/buildInfo/kotlin")
     inputs.property("version", appVersion)
+    inputs.property("repo", appRepo)
     outputs.dir(outputDir)
     doLast {
         val file = outputDir.get().file("dev/devtoolbox/core/BuildInfo.kt").asFile
@@ -20,6 +22,9 @@ val generateBuildInfo = tasks.register("generateBuildInfo") {
             |/** Metadados do build, preenchidos a partir de `gradle.properties`. */
             |object BuildInfo {
             |    const val VERSION: String = "$appVersion"
+            |
+            |    /** Repositório `dono/nome` no GitHub, usado na checagem de atualização. */
+            |    const val REPO: String = "$appRepo"
             |
             |    /** Como a UI mostra: "v1.2.0". */
             |    val displayVersion: String get() = "v" + VERSION

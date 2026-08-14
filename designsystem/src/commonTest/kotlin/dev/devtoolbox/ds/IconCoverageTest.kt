@@ -25,6 +25,7 @@ class IconCoverageTest {
         val chrome = listOf(
             "wrench", "magnifying-glass", "star", "arrows-out-line-vertical",
             "sun", "moon", "arrow-right", "check", "copy", "x-circle", "drop-half", "image-square",
+            "arrows-clockwise", "check-circle",
         )
         val missing = chrome.filterNot { it in PhosphorIcons.names }
         assertTrue(missing.isEmpty(), "ícones da moldura sem recurso: $missing")
