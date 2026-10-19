@@ -11,6 +11,7 @@ import dev.devtoolbox.core.ToolOutput
 import dev.devtoolbox.core.util.CodePoints
 import dev.devtoolbox.core.util.Lorem
 import dev.devtoolbox.core.util.StringCase
+import kotlin.math.abs
 
 object StringCaseTool : Tool {
     override val id = "string-case"
@@ -123,46 +124,103 @@ object SubstringTool : Tool {
     override val category = Category.Text
     override val icon = "selection"
     override val description =
-        "Recorte um trecho de uma string por índice inicial e final e veja o resultado destacado."
+        "Extraia um trecho de uma string pela posição inicial e pelo comprimento, linha a linha se quiser."
     override val defaultInput = ToolInput.Slice(
         text = "https://devtoolbox.dev/tools?id=substring",
-        start = "8",
-        end = "22",
+        start = "9",
+        length = "14",
     )
 
+    private val INTEGER = Regex("[+-]?\\d+")
+
+    // Mesma semântica do onlinestringtools.com/extract-substring: posições começam em 1,
+    // posição negativa conta do fim (-1 é o último caractere) e o sinal do comprimento é a
+    // direção do corte (negativo recorta para a esquerda terminando na posição inicial).
+    // Comprimento vazio vai até o fim; só "-" vai até o começo.
     override fun run(input: ToolInput): ToolOutput {
         val slice = input as? ToolInput.Slice ?: return ToolOutput.Failure("Entrada inválida.")
-
+        val lines = if (slice.multiLine) slice.text.split("\n") else listOf(slice.text)
         val points = CodePoints.split(slice.text)
-        val length = points.size
-        val start = (slice.start.trim().toIntOrNull() ?: 0).coerceIn(0, length)
-        val end = if (slice.end.isBlank()) {
-            length
-        } else {
-            (slice.end.trim().toIntOrNull() ?: 0).coerceIn(start, length)
+        val untouched = ToolBody.Substring(
+            text = slice.text,
+            length = points.size,
+            segments = if (slice.text.isEmpty()) emptyList() else listOf(Segment(slice.text, matched = false)),
+            result = "",
+        )
+
+        val startText = slice.start.trim()
+        val lengthText = slice.length.trim()
+        if (!INTEGER.matches(startText)) {
+            return ToolOutput.Failure("A posição inicial não é um número inteiro válido.", untouched)
+        }
+        if (!INTEGER.matches(lengthText) && lengthText != "" && lengthText != "-") {
+            return ToolOutput.Failure("O comprimento não é um número inteiro válido.", untouched)
+        }
+        val start = startText.toIntOrNull()
+            ?: return ToolOutput.Failure("A posição inicial é grande demais.", untouched)
+
+        val segments = mutableListOf<Segment>()
+        val pieces = mutableListOf<String>()
+        val shortLines = mutableListOf<Int>()
+        for ((index, line) in lines.withIndex()) {
+            if (index > 0) segments += Segment("\n", matched = false)
+            val chars = CodePoints.split(line)
+            val cut = cut(chars.size, start, lengthText)
+                ?: return ToolOutput.Failure("O comprimento é grande demais.", untouched)
+            if (cut.incomplete) shortLines += index + 1
+
+            val before = chars.subList(0, cut.from).joinToString("")
+            val selected = chars.subList(cut.from, cut.to)
+            val after = chars.subList(cut.to, chars.size).joinToString("")
+            if (before.isNotEmpty()) segments += Segment(before, matched = false)
+            if (selected.isNotEmpty()) segments += Segment(selected.joinToString(""), matched = true)
+            if (after.isNotEmpty()) segments += Segment(after, matched = false)
+
+            pieces += (if (slice.reverse) selected.asReversed() else selected).joinToString("")
         }
 
-        val before = points.subList(0, start).joinToString("")
-        val selected = points.subList(start, end).joinToString("")
-        val after = points.subList(end, length).joinToString("")
-
-        val segments = buildList {
-            if (before.isNotEmpty()) add(Segment(before, matched = false))
-            if (selected.isNotEmpty()) add(Segment(selected, matched = true))
-            if (after.isNotEmpty()) add(Segment(after, matched = false))
+        val warning = when {
+            shortLines.isEmpty() -> null
+            !slice.multiLine -> "Não havia caracteres suficientes para o comprimento pedido."
+            else -> "Não havia caracteres suficientes na${if (shortLines.size > 1) "s linhas" else " linha"} " +
+                shortLines.joinToString(", ") + "."
         }
 
         return ToolOutput.Success(
             ToolBody.Substring(
                 text = slice.text,
-                start = slice.start,
-                end = slice.end,
-                appliedStart = start,
-                appliedEnd = end,
-                length = length,
+                length = points.size,
                 segments = segments,
-                result = selected,
+                result = pieces.joinToString("\n"),
+                warning = warning,
             ),
         )
+    }
+
+    private class Cut(val from: Int, val to: Int, val incomplete: Boolean)
+
+    private fun cut(size: Int, start: Int, lengthText: String): Cut? {
+        val length: Long = when (lengthText) {
+            "" -> if (start > 0) size - start + 1L else -start.toLong()
+            "-" -> if (start > 0) -start.toLong() else -size - start - 1L
+            else -> lengthText.toLongOrNull() ?: return null
+        }
+        val (from, to) = when {
+            length > 0 -> {
+                val from = if (start > 0) start - 1L else size.toLong() + start
+                from to from + length
+            }
+            length < 0 -> {
+                val to = if (start > 0) start.toLong() else size.toLong() + start + 1
+                to + length to to
+            }
+            else -> 0L to 0L
+        }
+        val clampedFrom = from.coerceIn(0, size.toLong()).toInt()
+        val clampedTo = to.coerceIn(clampedFrom.toLong(), size.toLong()).toInt()
+        // Só avisa quando o comprimento foi digitado; vazio e "-" já significam "até a borda".
+        val explicit = lengthText != "" && lengthText != "-"
+        val incomplete = explicit && clampedTo - clampedFrom < abs(length)
+        return Cut(clampedFrom, clampedTo, incomplete)
     }
 }

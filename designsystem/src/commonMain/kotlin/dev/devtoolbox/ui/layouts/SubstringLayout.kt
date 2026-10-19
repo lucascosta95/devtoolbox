@@ -10,14 +10,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.core.ToolBody
 import dev.devtoolbox.core.ToolInput
+import dev.devtoolbox.core.util.CodePoints
 import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.components.Card
 import dev.devtoolbox.ds.components.CardKicker
 import dev.devtoolbox.ds.components.CopyButton
+import dev.devtoolbox.ds.components.OutlinedButton
 import dev.devtoolbox.ds.components.Text
 import dev.devtoolbox.ds.components.TextField
 import dev.devtoolbox.ui.panels.InputPanel
@@ -72,25 +77,36 @@ fun SubstringLayout(
                 kicker = "Início",
                 value = input.start,
                 onValueChange = { onInputChange(input.copy(start = it)) },
+                placeholder = "1",
                 modifier = Modifier.weight(1f),
             )
             IndexCard(
-                kicker = "Fim (exclusivo)",
-                value = input.end,
-                onValueChange = { onInputChange(input.copy(end = it)) },
+                kicker = "Comprimento",
+                value = input.length,
+                onValueChange = { onInputChange(input.copy(length = it)) },
+                placeholder = "até o fim",
                 modifier = Modifier.weight(1f),
             )
-            AppliedRangeCard(
-                start = body.appliedStart,
-                end = body.appliedEnd,
+            ModesCard(
+                multiLine = input.multiLine,
+                reverse = input.reverse,
+                onMultiLineChange = { onInputChange(input.copy(multiLine = it)) },
+                onReverseChange = { onInputChange(input.copy(reverse = it)) },
                 modifier = Modifier.weight(1f),
             )
         }
 
+        Text(
+            body.warning ?: "A posição 1 é o primeiro caractere e -1 o último. Comprimento negativo " +
+                "recorta para a esquerda; vazio vai até o fim e \"-\" até o começo.",
+            style = Nocturne.type.tag,
+            color = if (body.warning != null) colors.accent else colors.text(0.5f),
+        )
+
         ResizableBlock(resultBlock) {
             OutputPanel(
-                kicker = "Resultado · ${body.appliedEnd - body.appliedStart} caracteres",
-                text = AnnotatedString(if (empty) "Intervalo vazio" else body.result),
+                kicker = "Resultado · ${CodePoints.count(body.result)} caracteres",
+                text = AnnotatedString(if (empty) "Nada extraído" else body.result),
                 block = resultBlock,
                 slot = "result",
                 modifier = Modifier.fillMaxWidth(),
@@ -117,6 +133,7 @@ private fun IndexCard(
     kicker: String,
     value: String,
     onValueChange: (String) -> Unit,
+    placeholder: String,
     modifier: Modifier = Modifier,
 ) {
     Card(modifier) {
@@ -125,7 +142,7 @@ private fun IndexCard(
             TextField(
                 value = value,
                 onValueChange = onValueChange,
-                placeholder = "0",
+                placeholder = placeholder,
                 framed = false,
                 textStyle = Nocturne.type.mono,
             )
@@ -134,20 +151,39 @@ private fun IndexCard(
 }
 
 @Composable
-private fun AppliedRangeCard(start: Int, end: Int, modifier: Modifier = Modifier) {
+private fun ModesCard(
+    multiLine: Boolean,
+    reverse: Boolean,
+    onMultiLineChange: (Boolean) -> Unit,
+    onReverseChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Card(modifier) {
-        CardKicker("Intervalo aplicado")
-        Box(
-            contentAlignment = Alignment.CenterStart,
+        CardKicker("Modos")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Nocturne.space.xs),
             modifier = Modifier
                 .padding(top = Nocturne.space.xs)
                 .defaultMinSize(minHeight = INDEX_FIELD_HEIGHT),
         ) {
-            Text(
-                "[$start, $end)",
-                style = Nocturne.type.mono,
-                color = Nocturne.colors.accent,
-            )
+            ModeToggle("Por linha", multiLine, onMultiLineChange)
+            ModeToggle("Inverter", reverse, onReverseChange)
         }
     }
+}
+
+@Composable
+private fun ModeToggle(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    val colors = Nocturne.colors
+    OutlinedButton(
+        label = label,
+        onClick = { onCheckedChange(!checked) },
+        modifier = Modifier.semantics { toggleableState = ToggleableState(checked) },
+        icon = "check-circle",
+        iconFill = checked,
+        accentBorder = checked,
+        contentColor = if (checked) colors.accent else colors.text(0.7f),
+        textStyle = Nocturne.type.tag,
+    )
 }

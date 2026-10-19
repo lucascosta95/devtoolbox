@@ -1,136 +1,148 @@
 package dev.devtoolbox.core
 
 import dev.devtoolbox.core.tools.SubstringTool
-import dev.devtoolbox.core.util.CodePoints
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-private fun slice(text: String, start: String, end: String): ToolBody.Substring {
-    val out = SubstringTool.run(ToolInput.Slice(text, start, end))
+private fun extract(
+    text: String,
+    start: String,
+    length: String,
+    multiLine: Boolean = false,
+    reverse: Boolean = false,
+): ToolBody.Substring {
+    val out = SubstringTool.run(ToolInput.Slice(text, start, length, multiLine, reverse))
     assertIs<ToolOutput.Success>(out)
     return out.body as ToolBody.Substring
 }
 
+// Os exemplos esperados vêm de onlinestringtools.com/extract-substring, a referência da ferramenta.
 class SubstringToolTest {
 
     @Test
-    fun cutsTheRangeAskedFor() {
-        val body = slice("DevToolbox", "3", "8")
-
-        assertEquals("Toolb", body.result)
-        assertEquals(3, body.appliedStart)
-        assertEquals(8, body.appliedEnd)
+    fun positionsStartAtOne() {
+        assertEquals("place like", extract("There's no place like home.", "12", "10").result)
+        assertEquals("ui", extract("Penguin", "5", "2").result)
     }
 
     @Test
-    fun indicesBeyondTheEndAreClamped() {
-        val body = slice("abc", "99", "150")
-
-        assertEquals(3, body.appliedStart)
-        assertEquals(3, body.appliedEnd)
-        assertEquals("", body.result)
+    fun aNegativeStartCountsFromTheEnd() {
+        assertEquals("gu", extract("Penguin", "-4", "2").result)
+        assertEquals("n", extract("Penguin", "-1", "1").result)
     }
 
     @Test
-    fun negativeStartIsClampedToZero() {
-        val body = slice("abc", "-5", "2")
-
-        assertEquals(0, body.appliedStart)
-        assertEquals(2, body.appliedEnd)
-        assertEquals("ab", body.result)
+    fun aNegativeLengthCutsToTheLeftEndingAtTheStart() {
+        assertEquals("en", extract("Penguin", "3", "-2").result)
+        assertEquals("gui", extract("Penguin", "-2", "-3").result)
     }
 
     @Test
-    fun anEndBeforeTheStartIsAnEmptyRange() {
-        val body = slice("DevToolbox", "6", "2")
-
-        assertEquals(6, body.appliedStart)
-        assertEquals(6, body.appliedEnd)
-        assertEquals("", body.result)
+    fun anEmptyLengthGoesToTheEnd() {
+        assertEquals("guin", extract("Penguin", "4", "").result)
+        assertEquals("in", extract("Penguin", "-2", "").result)
     }
 
     @Test
-    fun anEmptyEndMeansUntilTheEnd() {
-        val body = slice("DevToolbox", "3", "")
-
-        assertEquals(10, body.appliedEnd)
-        assertEquals("Toolbox", body.result)
+    fun aBareMinusGoesToTheBeginning() {
+        assertEquals("Peng", extract("Penguin", "4", "-").result)
+        assertEquals("Pengui", extract("Penguin", "-2", "-").result)
     }
 
     @Test
-    fun aNonNumericValueCountsAsZero() {
-        val body = slice("DevToolbox", "abc", "4")
-
-        assertEquals(0, body.appliedStart)
-        assertEquals(4, body.appliedEnd)
-        assertEquals("DevT", body.result)
+    fun aPlusSignIsAccepted() {
+        assertEquals("ui", extract("Penguin", "+5", "+2").result)
     }
 
     @Test
-    fun whatWasTypedSurvivesTheSanitising() {
-        val body = slice("abc", "-5", "99")
+    fun aLengthPastTheEndKeepsWhatThereIsAndWarns() {
+        val body = extract("Penguin", "6", "10")
 
-        assertEquals("-5", body.start, "o campo mantém o que foi digitado")
-        assertEquals("99", body.end, "o campo mantém o que foi digitado")
-        assertEquals(0, body.appliedStart)
-        assertEquals(3, body.appliedEnd)
+        assertEquals("in", body.result)
+        assertNotNull(body.warning)
     }
 
     @Test
-    fun accentedCharactersAreCutByCharacterNotByByte() {
-        val body = slice("ação", "0", "3")
+    fun aLengthPastTheBeginningKeepsWhatThereIsAndWarns() {
+        val body = extract("Penguin", "2", "-5")
 
-        assertEquals(4, body.length)
-        assertEquals("açã", body.result)
+        assertEquals("Pe", body.result)
+        assertNotNull(body.warning)
     }
 
     @Test
-    fun emojiCountAsOneCharacterEach() {
-        val body = slice("a🙂b🚀c", "1", "3")
+    fun aCompleteCutHasNoWarning() {
+        assertNull(extract("Penguin", "1", "7").warning)
+    }
 
-        assertEquals(5, body.length, "cada emoji conta como um caractere")
+    @Test
+    fun multiLineModeCutsEachLine() {
+        val departures = """
+            08:15  Rome      MK 1744  Boarding
+            08:40  Oslo      SK 4711  Delayed
+        """.trimIndent()
+
+        val body = extract(departures, "24", "-7", multiLine = true)
+
+        assertEquals("MK 1744\nSK 4711", body.result)
+    }
+
+    @Test
+    fun multiLineModeNamesTheShortLines() {
+        val body = extract("abcdef\nab\nabcdef", "2", "3", multiLine = true)
+
+        assertEquals("bcd\nb\nbcd", body.result)
+        assertEquals("Não havia caracteres suficientes na linha 2.", body.warning)
+    }
+
+    @Test
+    fun withoutMultiLineTheTextIsOneString() {
+        assertEquals("b\nc", extract("ab\ncd", "2", "3").result)
+    }
+
+    @Test
+    fun reverseFlipsEachExtractedPiece() {
+        val body = extract("a cat\na dog\na fox", "-1", "-3", multiLine = true, reverse = true)
+
+        assertEquals("tac\ngod\nxof", body.result)
+    }
+
+    @Test
+    fun segmentsCoverTheWholeTextAndMarkOnlyTheSelection() {
+        val body = extract("abcdef\nabcdef", "2", "2", multiLine = true)
+
+        assertEquals("abcdef\nabcdef", body.segments.joinToString("") { it.text })
+        assertEquals("bcbc", body.segments.filter { it.matched }.joinToString("") { it.text })
+    }
+
+    @Test
+    fun accentsAndEmojiCountAsOneCharacterEach() {
+        assertEquals("çã", extract("ação", "2", "2").result)
+
+        val body = extract("a🙂b🚀c", "2", "2")
+        assertEquals(5, body.length)
         assertEquals("🙂b", body.result)
     }
 
     @Test
-    fun anEmojiIsNeverSplitInHalf() {
-        val body = slice("🙂🚀", "0", "1")
+    fun anInvalidNumberFailsButKeepsTheText() {
+        for ((start, length) in listOf("abc" to "2", "" to "2", "1" to "x", "1" to "2.5")) {
+            val out = SubstringTool.run(ToolInput.Slice("Penguin", start, length))
 
-        assertEquals(2, body.length)
-        assertEquals("🙂", body.result)
-    }
-
-    @Test
-    fun theResultLengthMatchesTheSanitisedRange() {
-        val subjects = listOf("DevToolbox", "ação e emoji 🙂🚀 no meio")
-        val ranges = listOf("0" to "4", "2" to "99", "-3" to "5", "7" to "2", "3" to "")
-
-        for (subject in subjects) {
-            for ((start, end) in ranges) {
-                val body = slice(subject, start, end)
-                val expected = body.appliedEnd - body.appliedStart
-                assertEquals(
-                    expected,
-                    CodePoints.count(body.result),
-                    "faixa [$start, $end) devia render $expected caracteres",
-                )
-            }
+            assertIs<ToolOutput.Failure>(out, "início '$start', comprimento '$length'")
+            val body = assertIs<ToolBody.Substring>(out.body)
+            assertEquals("Penguin", body.segments.joinToString("") { it.text })
+            assertEquals("", body.result)
         }
     }
 
     @Test
-    fun segmentsCoverTheWholeStringAndMarkOnlyTheSelection() {
-        val body = slice("DevToolbox", "3", "8")
-
-        assertEquals("DevToolbox", body.segments.joinToString("") { it.text })
-        assertEquals("Toolb", body.segments.filter { it.matched }.joinToString("") { it.text })
-    }
-
-    @Test
     fun anEmptyStringIsHandled() {
-        val body = slice("", "2", "5")
+        val body = extract("", "2", "5")
 
         assertEquals(0, body.length)
         assertEquals("", body.result)

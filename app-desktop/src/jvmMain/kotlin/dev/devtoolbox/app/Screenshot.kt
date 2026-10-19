@@ -71,10 +71,16 @@ fun main(args: Array<String>) {
             selectedId = "json-string",
             inputs = mapOf("json-string" to ToolInput.Text("\"{\\\"a\\\" 1}\"")),
         ),
+        "substring-por-linha" to AppState(
+            selectedId = "substring",
+            inputs = mapOf(
+                "substring" to ToolInput.Slice("a cat\na dog\nfox", "-1", "-3", multiLine = true, reverse = true),
+            ),
+        ),
         "substring-vazio" to AppState(
             selectedId = "substring",
             inputs = mapOf(
-                "substring" to ToolInput.Slice("DevToolbox", "6", "2"),
+                "substring" to ToolInput.Slice("DevToolbox", "4", "0"),
             ),
         ),
     ).map { (name, state) -> Shot(name, state) } + listOf(
