@@ -16,7 +16,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.core.ToolBody
 import dev.devtoolbox.ds.Nocturne
-import dev.devtoolbox.ds.Ramp
 import dev.devtoolbox.ds.components.CopyButton
 import dev.devtoolbox.ds.components.Text
 import dev.devtoolbox.ui.panels.InputPanel
@@ -49,7 +48,7 @@ fun JwtLayout(
     val transformation = remember(colors.onAccentSurface, colors.text) {
         JwtTokenTransformation(
             header = colors.onAccentSurface,
-            payload = Ramp.neutral300,
+            payload = colors.text(0.78f),
             signature = colors.text(0.45f),
         )
     }

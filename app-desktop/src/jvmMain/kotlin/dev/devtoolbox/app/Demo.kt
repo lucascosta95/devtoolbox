@@ -6,7 +6,8 @@ import androidx.compose.ui.unit.Density
 import dev.devtoolbox.core.ToolInput
 import dev.devtoolbox.core.update.Release
 import dev.devtoolbox.ds.AccentColor
-import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.Palettes
+import dev.devtoolbox.ds.ThemeChoice
 import dev.devtoolbox.ui.App
 import dev.devtoolbox.ui.AppState
 import dev.devtoolbox.ui.UpdateNotice
@@ -194,10 +195,10 @@ private fun storyboard(): List<Step> = Board().apply {
         HERO,
     )
 
-    hold(s.copy(theme = ThemeMode.Light), BEAT)
-    hold(s.copy(theme = ThemeMode.Light, accent = AccentColor.Cyan), 0.5)
-    hold(s.copy(theme = ThemeMode.Light, accent = AccentColor.Lime), 0.5)
-    hold(s.copy(theme = ThemeMode.Light, accent = AccentColor.Amber), 0.5)
+    hold(s.copy(theme = ThemeChoice.Preset(Palettes.NocturneLight)), BEAT)
+    hold(s.copy(theme = ThemeChoice.Preset(Palettes.NocturneLight), accent = AccentColor.Cyan), 0.5)
+    hold(s.copy(theme = ThemeChoice.Preset(Palettes.NocturneLight), accent = AccentColor.Lime), 0.5)
+    hold(s.copy(theme = ThemeChoice.Preset(Palettes.NocturneLight), accent = AccentColor.Amber), 0.5)
     hold(s.copy(accent = AccentColor.Rose), 0.5)
     hold(s.copy(accent = AccentColor.Teal), 0.5)
 

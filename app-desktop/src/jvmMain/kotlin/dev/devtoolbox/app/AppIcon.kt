@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.NocturneTheme
+import dev.devtoolbox.ds.Palettes
 import dev.devtoolbox.ds.Ramp
-import dev.devtoolbox.ds.ThemeMode
 import dev.devtoolbox.ds.components.PhosphorIcon
 import org.jetbrains.skia.Image
 import java.awt.image.BufferedImage
@@ -23,7 +23,7 @@ import java.awt.image.BufferedImage
 @OptIn(ExperimentalComposeUiApi::class)
 fun renderAppIcon(size: Int): Image {
     val scene = ImageComposeScene(width = size, height = size, density = Density(1f)) {
-        NocturneTheme(ThemeMode.Dark) {
+        NocturneTheme(Palettes.NocturneDark) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

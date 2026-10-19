@@ -4,7 +4,9 @@ import dev.devtoolbox.core.persistence.InMemoryStateStore
 import dev.devtoolbox.core.persistence.PersistedState
 import dev.devtoolbox.core.persistence.StateCodec
 import dev.devtoolbox.ds.AccentColor
-import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.CustomTheme
+import dev.devtoolbox.ds.Palettes
+import dev.devtoolbox.ds.ThemeChoice
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -50,7 +52,7 @@ class PersistenceTest {
         val state = AppState().mergedWith(saved)
         assertEquals("cron", state.selectedId)
         assertEquals(setOf("uuid"), state.favorites)
-        assertEquals(ThemeMode.Light, state.theme)
+        assertEquals(ThemeChoice.Preset(Palettes.NocturneLight), state.theme)
     }
 
     @Test
@@ -84,7 +86,7 @@ class PersistenceTest {
 
         val state = AppState().mergedWith(decoded)
         assertEquals("cron", state.selectedId)
-        assertEquals(ThemeMode.Light, state.theme)
+        assertEquals(ThemeChoice.Preset(Palettes.NocturneLight), state.theme)
         assertEquals(AccentColor.Teal, state.accent)
     }
 
@@ -143,6 +145,53 @@ class PersistenceTest {
         val store = InMemoryStateStore(PersistedState(selectedId = "qr", theme = "light"))
         val vm = AppViewModel(backgroundScope, AppState(), store)
         assertEquals("qr", vm.state.value.selectedId)
-        assertEquals(ThemeMode.Light, vm.state.value.theme)
+        assertEquals(ThemeChoice.Preset(Palettes.NocturneLight), vm.state.value.theme)
+    }
+
+    @Test
+    fun aPresetThemeSurvivesARoundTripThroughTheStore() = runTest {
+        val store = InMemoryStateStore()
+        val vm = AppViewModel(backgroundScope, AppState(), store)
+
+        vm.selectTheme(ThemeChoice.Preset(Palettes.Forest))
+        advanceTimeBy(PERSIST_DEBOUNCE_MS + 50)
+        assertEquals("forest", store.load()?.theme)
+
+        assertEquals(
+            ThemeChoice.Preset(Palettes.Forest),
+            AppViewModel(backgroundScope, AppState(), store).state.value.theme,
+        )
+    }
+
+    @Test
+    fun theCustomThemeAndItsColorsSurviveARoundTrip() = runTest {
+        val store = InMemoryStateStore()
+        val vm = AppViewModel(backgroundScope, AppState(), store)
+        val custom = CustomTheme(bg = "#141315", surface = "#1f1d20", accent = "#e2513c")
+
+        vm.updateCustomTheme(custom)
+        advanceTimeBy(PERSIST_DEBOUNCE_MS + 50)
+
+        val reloaded = AppViewModel(backgroundScope, AppState(), store).state.value
+        assertEquals(ThemeChoice.Custom, reloaded.theme)
+        assertEquals(custom, reloaded.customTheme)
+    }
+
+    @Test
+    fun customColorsAreKeptWhenSwitchingToAPresetAndBack() = runTest {
+        val vm = AppViewModel(backgroundScope)
+        val custom = CustomTheme(bg = "#111815", surface = "#1b2420", accent = "#3fbd85")
+
+        vm.updateCustomTheme(custom)
+        vm.selectTheme(ThemeChoice.Preset(Palettes.Paper))
+        vm.selectTheme(ThemeChoice.Custom)
+
+        assertEquals(custom, vm.state.value.customTheme)
+    }
+
+    @Test
+    fun anUnknownThemeIdFallsBackToTheDefault() {
+        val state = AppState().mergedWith(PersistedState(theme = "tema-removido"))
+        assertEquals(ThemeChoice.default, state.theme)
     }
 }

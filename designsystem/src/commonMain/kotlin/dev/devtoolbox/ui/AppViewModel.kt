@@ -7,6 +7,7 @@ import dev.devtoolbox.core.ToolInput
 import dev.devtoolbox.core.ToolOutput
 import dev.devtoolbox.core.ToolRegistry
 import dev.devtoolbox.core.persistence.NoOpStateStore
+import dev.devtoolbox.core.persistence.PersistedCustomTheme
 import dev.devtoolbox.core.persistence.PersistedState
 import dev.devtoolbox.core.persistence.StateStore
 import dev.devtoolbox.core.update.GitHubReleases
@@ -15,7 +16,11 @@ import dev.devtoolbox.core.update.Release
 import dev.devtoolbox.core.update.ReleaseFetcher
 import dev.devtoolbox.core.update.pendingUpdate
 import dev.devtoolbox.ds.AccentColor
-import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.CustomTheme
+import dev.devtoolbox.ds.NocturneColors
+import dev.devtoolbox.ds.Palettes
+import dev.devtoolbox.ds.ThemeChoice
+import dev.devtoolbox.ds.colorsFor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,15 +52,19 @@ data class AppState(
     val query: String = "",
     val selectedId: String = ToolRegistry.default.id,
     val favorites: Set<String> = setOf("base64", "json"),
-    val theme: ThemeMode = ThemeMode.Dark,
+    val theme: ThemeChoice = ThemeChoice.default,
     val accent: AccentColor = AccentColor.default,
+    val customTheme: CustomTheme = CustomTheme(),
     val inputs: Map<String, ToolInput> = emptyMap(),
     val skippedVersion: String? = null,
     val updateNotice: UpdateNotice? = null,
+    val appearanceOpen: Boolean = false,
 ) {
     val selectedTool: Tool get() = ToolRegistry.byId(selectedId) ?: ToolRegistry.default
 
     val currentInput: ToolInput get() = inputs[selectedId] ?: selectedTool.defaultInput
+
+    val colors: NocturneColors get() = colorsFor(theme, accent, customTheme)
 
     val isSearching: Boolean get() = query.isNotBlank()
 
@@ -134,7 +143,22 @@ class AppViewModel(
 
     fun toggleFavoriteOfSelected() = toggleFavorite(_state.value.selectedId)
 
-    fun toggleTheme() = _state.update { it.copy(theme = it.theme.toggled()) }
+    // O atalho alterna entre os dois Nocturne: com nove temas não há um "oposto" natural para
+    // cada um, e o claro/escuro padrão é o que se espera de Ctrl+Shift+L.
+    fun toggleTheme() = _state.update {
+        val next = if (it.colors.isDark) Palettes.NocturneLight else Palettes.NocturneDark
+        it.copy(theme = ThemeChoice.Preset(next))
+    }
+
+    fun openAppearance() = _state.update { it.copy(appearanceOpen = true) }
+
+    fun closeAppearance() = _state.update { it.copy(appearanceOpen = false) }
+
+    fun selectTheme(theme: ThemeChoice) = _state.update { it.copy(theme = theme) }
+
+    fun updateCustomTheme(custom: CustomTheme) = _state.update {
+        it.copy(theme = ThemeChoice.Custom, customTheme = custom)
+    }
 
     fun selectAccent(accent: AccentColor) = _state.update { it.copy(accent = accent) }
 
@@ -187,19 +211,17 @@ class AppViewModel(
 fun AppState.persisted() = PersistedState(
     selectedId = selectedId,
     favorites = favorites.toList().sorted(),
-    theme = if (theme == ThemeMode.Dark) "dark" else "light",
+    theme = theme.id,
     accent = accent.id,
+    customTheme = PersistedCustomTheme(customTheme.bg, customTheme.surface, customTheme.accent),
     skippedVersion = skippedVersion,
 )
 
 fun AppState.mergedWith(saved: PersistedState): AppState = copy(
     selectedId = saved.selectedId?.takeIf { ToolRegistry.byId(it) != null } ?: selectedId,
     favorites = saved.favorites.filter { ToolRegistry.byId(it) != null }.toSet(),
-    theme = when (saved.theme) {
-        "light" -> ThemeMode.Light
-        "dark" -> ThemeMode.Dark
-        else -> theme
-    },
+    theme = ThemeChoice.byId(saved.theme) ?: theme,
     accent = AccentColor.byId(saved.accent) ?: accent,
+    customTheme = saved.customTheme?.let { CustomTheme(it.bg, it.surface, it.accent) } ?: customTheme,
     skippedVersion = saved.skippedVersion,
 )

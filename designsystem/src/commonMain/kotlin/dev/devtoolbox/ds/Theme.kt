@@ -24,11 +24,6 @@ import dev.devtoolbox.ds.resources.jetbrains_mono_regular
 import dev.devtoolbox.ds.resources.jetbrains_mono_semibold
 import org.jetbrains.compose.resources.Font
 
-enum class ThemeMode { Dark, Light;
-
-    fun toggled() = if (this == Dark) Light else Dark
-}
-
 @Immutable
 data class NocturneTypography(
     val toolTitle: TextStyle,
@@ -93,11 +88,16 @@ private fun typography(): NocturneTypography {
 
 @Composable
 fun NocturneTheme(
-    mode: ThemeMode,
+    palette: Palette,
     accent: AccentColor = AccentColor.default,
     content: @Composable () -> Unit,
+) = NocturneTheme(colorsFor(palette, accent.color), content)
+
+@Composable
+fun NocturneTheme(
+    colors: NocturneColors,
+    content: @Composable () -> Unit,
 ) {
-    val colors = colorsFor(mode, accent)
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalTypography provides typography(),

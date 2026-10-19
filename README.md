@@ -70,6 +70,14 @@ On startup the app asks GitHub whether a newer release exists and, if so, offers
 You can postpone the notice or skip that version — a later release brings it back on its own.
 Clicking the version in the sidebar footer checks on the spot. Offline, the check fails silently.
 
+## Appearance
+
+The palette icon in the title bar opens the theme picker: nine ready-made themes (Nocturne,
+Graphite, OLED Black, Ocean, Forest, Coffee, Nocturne Light, Mist and Paper), each with the
+accent color of your choice, or a custom theme built from three colors — background, surface
+and accent. The custom theme's text and borders are derived from the background so they stay
+readable.
+
 ## Shortcuts
 
 | | |
@@ -78,7 +86,7 @@ Clicking the version in the sidebar footer checks on the spot. Offline, the chec
 | `↑` `↓` | Navigate the filtered list |
 | `Esc` | Clear the search |
 | `Ctrl/Cmd` + `D` | Favorite the active tool |
-| `Ctrl/Cmd` + `Shift` + `L` | Toggle light/dark |
+| `Ctrl/Cmd` + `Shift` + `L` | Toggle between Nocturne light and dark |
 
 Favorites, theme, accent color, the last open tool and a skipped update version are remembered
 across runs
