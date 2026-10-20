@@ -199,8 +199,7 @@ private fun ToolBodyContent(
         is ToolBody.Substring -> SubstringLayout(
             body = body,
             toolId = toolId,
-            input = currentInput as? ToolInput.Slice
-                ?: ToolInput.Slice(body.text, body.start, body.end),
+            input = currentInput as? ToolInput.Slice ?: ToolInput.Slice(body.text, "1", ""),
             onInputChange = onInputChange,
         )
         is ToolBody.Validate ->

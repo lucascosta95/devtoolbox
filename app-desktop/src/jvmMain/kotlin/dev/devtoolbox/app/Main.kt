@@ -1,5 +1,6 @@
 package dev.devtoolbox.app
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,7 @@ fun main() = application {
         title = "DevToolbox",
         state = windowState,
     ) {
+        LaunchedEffect(Unit) { window.iconImages = appWindowIcons() }
         window.minimumSize = java.awt.Dimension(1000, 640)
         App(store = store, releases = releases)
     }

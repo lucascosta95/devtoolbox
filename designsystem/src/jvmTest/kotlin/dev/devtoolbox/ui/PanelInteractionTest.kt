@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.NocturneTheme
-import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.Palettes
 import dev.devtoolbox.ui.panels.InputPanel
 import dev.devtoolbox.ui.panels.PanelBlock
 import dev.devtoolbox.ui.panels.PanelEdges
@@ -101,7 +101,7 @@ class PanelInteractionTest {
         val panel = remember { block }
 
         CompositionLocalProvider(LocalDensity provides Density(1f)) {
-            NocturneTheme(ThemeMode.Dark, AccentColor.Teal) {
+            NocturneTheme(Palettes.NocturneDark, AccentColor.Teal) {
                 Box(Modifier.size(PANEL_WIDTH, PANEL_HEIGHT)) {
                     InputPanel(
                         kicker = "Entrada",

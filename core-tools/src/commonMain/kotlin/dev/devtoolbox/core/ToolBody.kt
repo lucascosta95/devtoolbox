@@ -44,13 +44,10 @@ sealed interface ToolBody {
 
     data class Substring(
         val text: String,
-        val start: String,
-        val end: String,
-        val appliedStart: Int,
-        val appliedEnd: Int,
         val length: Int,
         val segments: List<Segment>,
         val result: String,
+        val warning: String? = null,
     ) : ToolBody
 
     data class Validate(

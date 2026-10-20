@@ -6,7 +6,10 @@ import androidx.compose.ui.unit.Density
 import dev.devtoolbox.core.ToolInput
 import dev.devtoolbox.core.ToolRegistry
 import dev.devtoolbox.core.update.Release
-import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.AccentColor
+import dev.devtoolbox.ds.Palettes
+import dev.devtoolbox.ds.ThemeChoice
+import dev.devtoolbox.ds.customThemePresets
 import dev.devtoolbox.ui.App
 import dev.devtoolbox.ui.AppState
 import dev.devtoolbox.ui.UpdateNotice
@@ -21,8 +24,8 @@ fun main(args: Array<String>) {
     val outDir = File(args.getOrElse(0) { "build/screenshots" }).apply { mkdirs() }
 
     val shots = ToolRegistry.all.map { Shot(it.id, AppState(selectedId = it.id)) } + listOf(
-        "tema-light" to AppState(theme = ThemeMode.Light),
-        "cnpj-light" to AppState(selectedId = "cnpj", theme = ThemeMode.Light),
+        "tema-light" to AppState(theme = ThemeChoice.Preset(Palettes.NocturneLight)),
+        "cnpj-light" to AppState(selectedId = "cnpj", theme = ThemeChoice.Preset(Palettes.NocturneLight)),
         "busca" to AppState(query = "enc"),
         "busca-validadores" to AppState(query = "valida", selectedId = "card"),
         "img64-carregado" to AppState(
@@ -46,13 +49,13 @@ fun main(args: Array<String>) {
         ),
         "atualizacao-em-dia" to AppState(
             selectedId = "json",
-            theme = ThemeMode.Light,
+            theme = ThemeChoice.Preset(Palettes.NocturneLight),
             updateNotice = UpdateNotice.UpToDate,
         ),
         "accent-teal" to AppState(selectedId = "card", accent = dev.devtoolbox.ds.AccentColor.Teal),
         "accent-amber-light" to AppState(
             selectedId = "regex",
-            theme = ThemeMode.Light,
+            theme = ThemeChoice.Preset(Palettes.NocturneLight),
             accent = dev.devtoolbox.ds.AccentColor.Amber,
         ),
         "erro-json" to AppState(
@@ -71,10 +74,24 @@ fun main(args: Array<String>) {
             selectedId = "json-string",
             inputs = mapOf("json-string" to ToolInput.Text("\"{\\\"a\\\" 1}\"")),
         ),
+        "aparencia" to AppState(appearanceOpen = true),
+        "aparencia-personalizado" to AppState(
+            appearanceOpen = true,
+            theme = ThemeChoice.Custom,
+            customTheme = customThemePresets.first().theme,
+        ),
+        "tema-floresta" to AppState(selectedId = "jwt", theme = ThemeChoice.Preset(Palettes.Forest), accent = AccentColor.Teal),
+        "tema-papel" to AppState(selectedId = "jwt", theme = ThemeChoice.Preset(Palettes.Paper), accent = AccentColor.Rose),
+        "substring-por-linha" to AppState(
+            selectedId = "substring",
+            inputs = mapOf(
+                "substring" to ToolInput.Slice("a cat\na dog\nfox", "-1", "-3", multiLine = true, reverse = true),
+            ),
+        ),
         "substring-vazio" to AppState(
             selectedId = "substring",
             inputs = mapOf(
-                "substring" to ToolInput.Slice("DevToolbox", "6", "2"),
+                "substring" to ToolInput.Slice("DevToolbox", "4", "0"),
             ),
         ),
     ).map { (name, state) -> Shot(name, state) } + listOf(

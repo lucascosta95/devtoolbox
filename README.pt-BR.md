@@ -70,6 +70,14 @@ Ao abrir, o app pergunta ao GitHub se existe uma release mais nova e, se existir
 Dá para adiar o aviso ou pular aquela versão — uma release posterior volta a avisar sozinha.
 Clicar na versão no rodapé da barra lateral checa na hora. Sem internet, a checagem falha em silêncio.
 
+## Aparência
+
+O ícone de paleta na barra de título abre a escolha de tema: nove temas prontos (Nocturne,
+Grafite, Preto OLED, Oceano, Floresta, Café, Nocturne claro, Névoa e Papel), cada um com a cor
+de destaque que você quiser, ou um tema personalizado montado a partir de três cores — fundo,
+superfície e destaque. O texto e as bordas do personalizado são derivados do fundo, para
+continuarem legíveis.
+
 ## Atalhos
 
 | | |
@@ -78,7 +86,7 @@ Clicar na versão no rodapé da barra lateral checa na hora. Sem internet, a che
 | `↑` `↓` | Navega a lista filtrada |
 | `Esc` | Limpa a busca |
 | `Ctrl/Cmd` + `D` | Favorita a ferramenta ativa |
-| `Ctrl/Cmd` + `Shift` + `L` | Alterna claro/escuro |
+| `Ctrl/Cmd` + `Shift` + `L` | Alterna entre Nocturne claro e escuro |
 
 Favoritos, tema, cor de destaque, última ferramenta aberta e a versão pulada no aviso de
 atualização são lembrados entre execuções

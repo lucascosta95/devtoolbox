@@ -56,33 +56,23 @@ data class NocturneColors(
     val mutedSurface: Color get() = text.copy(alpha = 0.08f)
 }
 
-fun colorsFor(mode: ThemeMode, accent: AccentColor): NocturneColors {
-    val isDark = mode == ThemeMode.Dark
-    val accents = AccentTokens.derive(accent.color, isDark)
-    return if (isDark) {
-        NocturneColors(
-            bg = Ramp.bgDark,
-            surface = Ramp.surfaceDark,
-            text = Ramp.textDark,
-            divider = Ramp.textDark.copy(alpha = 0.16f),
-            isDark = true,
-            accents = accents,
-        )
-    } else {
-        NocturneColors(
-            bg = Ramp.neutral100,
-            surface = Ramp.neutral200,
-            text = Ramp.neutral900,
-            divider = Ramp.neutral900.copy(alpha = 0.16f),
-            isDark = false,
-            accents = accents,
-        )
-    }
+fun colorsFor(palette: Palette, accent: Color): NocturneColors = NocturneColors(
+    bg = palette.bg,
+    surface = palette.surface,
+    text = palette.text,
+    divider = palette.text.copy(alpha = 0.16f),
+    isDark = palette.isDark,
+    accents = AccentTokens.derive(accent, palette.isDark),
+)
+
+fun colorsFor(theme: ThemeChoice, accent: AccentColor, custom: CustomTheme): NocturneColors = when (theme) {
+    is ThemeChoice.Preset -> colorsFor(theme.palette, accent.color)
+    ThemeChoice.Custom -> colorsFor(custom.palette(), custom.accentColor())
 }
 
-val DarkColors = colorsFor(ThemeMode.Dark, AccentColor.default)
+val DarkColors = colorsFor(Palettes.NocturneDark, AccentColor.default.color)
 
-val LightColors = colorsFor(ThemeMode.Light, AccentColor.default)
+val LightColors = colorsFor(Palettes.NocturneLight, AccentColor.default.color)
 
 @Immutable
 data class Spacing(

@@ -10,8 +10,16 @@ data class PersistedState(
     val favorites: List<String> = emptyList(),
     val theme: String? = null,
     val accent: String? = null,
+    @SerialName("custom_theme") val customTheme: PersistedCustomTheme? = null,
     @SerialName("update_skipped_version") val skippedVersion: String? = null,
     val version: Int = 1,
+)
+
+@Serializable
+data class PersistedCustomTheme(
+    val bg: String,
+    val surface: String,
+    val accent: String,
 )
 
 object StateCodec {

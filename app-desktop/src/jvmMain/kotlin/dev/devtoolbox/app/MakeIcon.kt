@@ -1,25 +1,9 @@
 package dev.devtoolbox.app
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.ImageComposeScene
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
-import dev.devtoolbox.ds.NocturneTheme
-import dev.devtoolbox.ds.Ramp
-import dev.devtoolbox.ds.ThemeMode
-import dev.devtoolbox.ds.components.PhosphorIcon
 import org.jetbrains.skia.EncodedImageFormat
 import java.io.ByteArrayOutputStream
 import java.io.File
 
-@OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
     val outDir = File(args.getOrElse(0) { "src/jvmMain/resources/icons" }).apply { mkdirs() }
 
@@ -38,28 +22,9 @@ fun main(args: Array<String>) {
     println("ícones escritos em ${outDir.absolutePath}: devtoolbox.png, .ico, .icns")
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
-private fun renderPng(size: Int): ByteArray {
-    val scene = ImageComposeScene(width = size, height = size, density = Density(1f)) {
-        NocturneTheme(ThemeMode.Dark) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape((size * 0.1875f).dp))
-                    .background(Ramp.accent900),
-                contentAlignment = Alignment.Center,
-            ) {
-                PhosphorIcon("wrench", size = (size * 0.547f).dp, tint = Ramp.accent300)
-            }
-        }
-    }
-    scene.render(0)
-    val image = scene.render(600_000_000L)
-    val bytes = image.encodeToData(EncodedImageFormat.PNG)?.bytes
+private fun renderPng(size: Int): ByteArray =
+    renderAppIcon(size).encodeToData(EncodedImageFormat.PNG)?.bytes
         ?: error("falha ao codificar o PNG de ${size}px")
-    scene.close()
-    return bytes
-}
 
 private fun buildIco(images: List<Pair<Int, ByteArray>>): ByteArray {
     val out = ByteArrayOutputStream()

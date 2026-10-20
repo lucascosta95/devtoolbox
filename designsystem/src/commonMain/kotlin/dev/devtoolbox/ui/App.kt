@@ -38,7 +38,7 @@ import dev.devtoolbox.core.update.ReleaseFetcher
 import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.Nocturne
 import dev.devtoolbox.ds.NocturneTheme
-import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.ThemeChoice
 import dev.devtoolbox.ds.components.AccentPicker
 import dev.devtoolbox.ds.components.CopyFeedbackState
 import dev.devtoolbox.ds.components.IconButton
@@ -69,7 +69,7 @@ fun App(
         viewModel.checkForUpdates()
     }
 
-    NocturneTheme(state.theme, state.accent) {
+    NocturneTheme(state.colors) {
         CompositionLocalProvider(
             LocalCopyFeedback provides copyFeedback,
             LocalPanelStore provides panels,
@@ -100,9 +100,8 @@ fun App(
                 },
         ) {
             TitleBar(
-                theme = state.theme,
-                accent = state.accent,
-                onToggleTheme = viewModel::toggleTheme,
+                accent = state.accent.takeIf { state.theme != ThemeChoice.Custom },
+                onOpenAppearance = viewModel::openAppearance,
                 onSelectAccent = viewModel::selectAccent,
             )
 
@@ -140,6 +139,21 @@ fun App(
             }
         }
 
+        if (state.appearanceOpen) {
+            AppearanceDialog(
+                theme = state.theme,
+                accent = state.accent,
+                customTheme = state.customTheme,
+                onSelectTheme = viewModel::selectTheme,
+                onSelectAccent = viewModel::selectAccent,
+                onCustomThemeChange = viewModel::updateCustomTheme,
+                onClose = {
+                    viewModel.closeAppearance()
+                    runCatching { rootFocus.requestFocus() }
+                },
+            )
+        }
+
         state.updateNotice?.let { notice ->
             UpdateDialog(
                 notice = notice,
@@ -163,9 +177,8 @@ fun App(
 
 @Composable
 private fun TitleBar(
-    theme: ThemeMode,
-    accent: AccentColor,
-    onToggleTheme: () -> Unit,
+    accent: AccentColor?,
+    onOpenAppearance: () -> Unit,
     onSelectAccent: (AccentColor) -> Unit,
 ) {
     val colors = Nocturne.colors
@@ -186,15 +199,16 @@ private fun TitleBar(
             horizontalArrangement = Arrangement.spacedBy(Nocturne.space.sm),
             modifier = Modifier.align(Alignment.CenterEnd).padding(end = Nocturne.space.sm),
         ) {
-            AccentPicker(selected = accent, onSelect = onSelectAccent)
+            if (accent != null) {
+                AccentPicker(selected = accent, onSelect = onSelectAccent)
 
-            Box(Modifier.width(1.dp).height(18.dp).background(colors.divider))
+                Box(Modifier.width(1.dp).height(18.dp).background(colors.divider))
+            }
 
             IconButton(
-                icon = if (theme == ThemeMode.Dark) "sun" else "moon",
-                contentDescription =
-                    if (theme == ThemeMode.Dark) "Usar tema claro" else "Usar tema escuro",
-                onClick = onToggleTheme,
+                icon = "palette",
+                contentDescription = "Aparência",
+                onClick = onOpenAppearance,
             )
         }
 

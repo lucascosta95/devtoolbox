@@ -84,11 +84,11 @@ class AccentTest {
 
     @Test
     fun themeColorsFollowTheChosenAccent() {
-        val teal = colorsFor(ThemeMode.Dark, AccentColor.Teal)
+        val teal = colorsFor(Palettes.NocturneDark, AccentColor.Teal.color)
         assertEquals(AccentColor.Teal.color, teal.accent)
         assertEquals(teal.accents.accent900, teal.accentSurface)
         assertEquals(teal.accents.accent300, teal.onAccentSurface)
-        assertTrue(teal.accentSurface != colorsFor(ThemeMode.Dark, AccentColor.Rose).accentSurface)
+        assertTrue(teal.accentSurface != colorsFor(Palettes.NocturneDark, AccentColor.Rose.color).accentSurface)
     }
 
     @Test

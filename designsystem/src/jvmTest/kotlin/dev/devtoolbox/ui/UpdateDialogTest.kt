@@ -15,7 +15,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import dev.devtoolbox.core.update.Release
 import dev.devtoolbox.ds.AccentColor
 import dev.devtoolbox.ds.NocturneTheme
-import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.Palettes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -109,7 +109,7 @@ class UpdateDialogTest {
         onRemindLater: () -> Unit = {},
         onSkipVersion: (Release) -> Unit = {},
     ) {
-        NocturneTheme(ThemeMode.Dark, AccentColor.Teal) {
+        NocturneTheme(Palettes.NocturneDark, AccentColor.Teal) {
             UpdateDialog(
                 notice = notice,
                 onOpenRelease = onOpenRelease,

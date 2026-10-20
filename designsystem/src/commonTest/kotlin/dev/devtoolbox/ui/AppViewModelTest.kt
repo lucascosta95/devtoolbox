@@ -3,7 +3,8 @@ package dev.devtoolbox.ui
 import dev.devtoolbox.core.ToolBody
 import dev.devtoolbox.core.ToolInput
 import dev.devtoolbox.core.ToolOutput
-import dev.devtoolbox.ds.ThemeMode
+import dev.devtoolbox.ds.Palettes
+import dev.devtoolbox.ds.ThemeChoice
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -30,9 +31,9 @@ class AppViewModelTest {
     @Test
     fun themeToggles() = runTest {
         val vm = AppViewModel(backgroundScope)
-        assertEquals(ThemeMode.Dark, vm.state.value.theme)
+        assertEquals(ThemeChoice.Preset(Palettes.NocturneDark), vm.state.value.theme)
         vm.toggleTheme()
-        assertEquals(ThemeMode.Light, vm.state.value.theme)
+        assertEquals(ThemeChoice.Preset(Palettes.NocturneLight), vm.state.value.theme)
     }
 
     @Test
