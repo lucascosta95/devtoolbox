@@ -133,10 +133,6 @@ object SubstringTool : Tool {
 
     private val INTEGER = Regex("[+-]?\\d+")
 
-    // Mesma semântica do onlinestringtools.com/extract-substring: posições começam em 1,
-    // posição negativa conta do fim (-1 é o último caractere) e o sinal do comprimento é a
-    // direção do corte (negativo recorta para a esquerda terminando na posição inicial).
-    // Comprimento vazio vai até o fim; só "-" vai até o começo.
     override fun run(input: ToolInput): ToolOutput {
         val slice = input as? ToolInput.Slice ?: return ToolOutput.Failure("Entrada inválida.")
         val lines = if (slice.multiLine) slice.text.split("\n") else listOf(slice.text)
@@ -218,7 +214,6 @@ object SubstringTool : Tool {
         }
         val clampedFrom = from.coerceIn(0, size.toLong()).toInt()
         val clampedTo = to.coerceIn(clampedFrom.toLong(), size.toLong()).toInt()
-        // Só avisa quando o comprimento foi digitado; vazio e "-" já significam "até a borda".
         val explicit = lengthText != "" && lengthText != "-"
         val incomplete = explicit && clampedTo - clampedFrom < abs(length)
         return Cut(clampedFrom, clampedTo, incomplete)

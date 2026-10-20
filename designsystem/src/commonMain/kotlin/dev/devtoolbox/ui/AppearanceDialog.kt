@@ -137,8 +137,6 @@ private fun ThemeGrid(
     }
 }
 
-// Uma miniatura da janela no tema: barra de título na cor de superfície, duas linhas de texto e
-// um botão no destaque, para comparar os temas sem precisar aplicar cada um.
 @Composable
 private fun ThemeTile(
     palette: Palette,

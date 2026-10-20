@@ -143,8 +143,6 @@ class AppViewModel(
 
     fun toggleFavoriteOfSelected() = toggleFavorite(_state.value.selectedId)
 
-    // O atalho alterna entre os dois Nocturne: com nove temas não há um "oposto" natural para
-    // cada um, e o claro/escuro padrão é o que se espera de Ctrl+Shift+L.
     fun toggleTheme() = _state.update {
         val next = if (it.colors.isDark) Palettes.NocturneLight else Palettes.NocturneDark
         it.copy(theme = ThemeChoice.Preset(next))

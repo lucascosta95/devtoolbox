@@ -199,7 +199,6 @@ private fun TitleBar(
             horizontalArrangement = Arrangement.spacedBy(Nocturne.space.sm),
             modifier = Modifier.align(Alignment.CenterEnd).padding(end = Nocturne.space.sm),
         ) {
-            // No tema personalizado o destaque é uma das três cores dele, editada no diálogo.
             if (accent != null) {
                 AccentPicker(selected = accent, onSelect = onSelectAccent)
 

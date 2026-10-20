@@ -4,8 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import kotlin.math.roundToInt
 
-// Os neutros de um tema. A cor de destaque fica de fora: nos temas prontos ela vem do
-// AccentPicker e no personalizado do próprio CustomTheme.
 @Immutable
 data class Palette(
     val id: String,
@@ -18,7 +16,6 @@ data class Palette(
 }
 
 object Palettes {
-    // "dark" e "light" são os ids que o state.json já gravava antes de existirem outros temas.
     val NocturneDark = Palette("dark", "Nocturne", Ramp.bgDark, Ramp.surfaceDark, Ramp.textDark)
     val Graphite = Palette("graphite", "Grafite", Color(0xFF18181B), Color(0xFF242427), Color(0xFFE6E6E8))
     val Oled = Palette("oled", "Preto OLED", Color(0xFF000000), Color(0xFF131315), Color(0xFFE8E8EA))
@@ -55,9 +52,6 @@ sealed interface ThemeChoice {
     }
 }
 
-// O tema montado pelo usuário: só três cores, guardadas em hex como entram e saem dos campos.
-// Texto e divisor são derivados do fundo, então não há como montar um tema com texto ilegível.
-// O padrão é o Nocturne escuro, para que abrir o personalizado não mude nada na tela.
 @Immutable
 data class CustomTheme(
     val bg: String = Ramp.bgDark.toHex(),
@@ -91,8 +85,6 @@ val customThemePresets = listOf(
     CustomThemePreset("Papel", CustomTheme("#f4f2ec", "#e8e3d8", "#c2492f")),
 )
 
-// Aceita "#rrggbb" ou "rrggbb" em qualquer caixa; qualquer outra coisa é null, porque o campo
-// passa por estados inválidos enquanto a pessoa digita.
 fun parseHexColor(hex: String): Color? {
     val digits = hex.trim().removePrefix("#")
     if (digits.length != 6) return null
@@ -105,6 +97,5 @@ fun Color.toHex(): String {
     return "#${channel(red)}${channel(green)}${channel(blue)}"
 }
 
-// Luminância percebida; é ela que decide se o texto vai para o branco ou para o preto.
 fun isDarkBackground(bg: Color): Boolean =
     (0.299 * bg.red + 0.587 * bg.green + 0.114 * bg.blue) * 255.0 < 140.0

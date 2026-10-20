@@ -53,10 +53,6 @@ tasks.matching { it.name.startsWith("package") || it.name == "createDistributabl
 
 val appMainClass = "dev.devtoolbox.app.MainKt"
 
-// AWT deriva o WM_CLASS da janela a partir da main class (pontos -> hífens). O .desktop
-// gerado pelo jpackage no Linux não define StartupWMClass, então o GNOME Shell não
-// associa a janela em execução ao .desktop e cai no ícone genérico (engrenagem do Yaru)
-// na dock/alt-tab, mesmo com o ícone correto no menu de aplicativos.
 val linuxStartupWMClass = appMainClass.replace('.', '-')
 
 tasks.register("fixLinuxDesktopIcon") {

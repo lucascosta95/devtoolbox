@@ -41,8 +41,6 @@ fun renderAppIcon(size: Int): Image {
     return image
 }
 
-// Sem ícone explícito, o AWT mostra a xícara do Java na barra de título (Windows) e no
-// alt-tab. Vários tamanhos deixam o sistema escolher o mais nítido para cada escala de DPI.
 fun appWindowIcons(): List<BufferedImage> =
     listOf(16, 20, 24, 32, 40, 48, 64, 128, 256)
         .map { renderAppIcon(it).toComposeImageBitmap().toAwtImage() }

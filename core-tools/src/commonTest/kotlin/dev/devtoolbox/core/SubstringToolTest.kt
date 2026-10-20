@@ -20,7 +20,6 @@ private fun extract(
     return out.body as ToolBody.Substring
 }
 
-// Os exemplos esperados vêm de onlinestringtools.com/extract-substring, a referência da ferramenta.
 class SubstringToolTest {
 
     @Test
